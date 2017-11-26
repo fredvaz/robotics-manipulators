@@ -11,9 +11,8 @@ disp('%%                   Paulo Almeida, nº 2010128473                   %%')
 disp('%%                                                                  %%')
 disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 disp(' ')
-%% Robô 3-DOF
-
 disp('*************************** Exercício 1 ******************************')
+%% Robô 3-DOF
 
 syms theta1 theta2 theta3
 
@@ -34,7 +33,8 @@ PJ_DH = [  theta1    0    a2       0        0           R;   % Junta Rotacional
 oTg = simplify(oTg);
 Ti = simplify(Ti);
 
-% Inicializacao do Robo: Criar Links
+
+%% INICIALIZAÇÃO DO ROBOT: CRIAR LINKS
 
 % 3 juntas Rotacionais     
 for i=1:3
@@ -47,19 +47,16 @@ end
 robot = SerialLink(L, 'name', 'Robot Planar RRR');
 
 
-
-% Váriáveis "globais":
+%% VARIÁVEIS GLOBAIS 
 
 % Inicialização do vector de juntas
 q = [ 0 0 0 ];
-
 
 % a) Posição Home
 bTf = [ 0  -1   0   50;
         1   0   0   50;
         0   0   1   d3;
-        0   0   0   0  ];
-
+        0   0   0   0  ];    
     
 % b) Jacobiano 
 
@@ -73,8 +70,7 @@ Jac = Jacobian(oTg, Ti, q_aux, PJ_DH(:,6));
 Jac_ = [ Jac(1:2,:); Jac(6,:) ];
         
 
-
-% Variaveis MENU
+%% MENU ("main")
 select = 0;
 select2 = 0;
 STOP = 6;
@@ -95,7 +91,7 @@ while(select ~= STOP)
         disp('PJ_DH: Matriz dos parametros de Denavith-Hartenberg:')
         disp('______________________________________________________________________')
         disp(' ')
-        disp(PJ_DH) % Ver se dá para colocar a tabela do SerialLink
+        PJ_DH_ = SerialLink(L, 'name', 'Robot Planar RRPRP')
         disp('______________________________________________________________________')
         disp(' ')
         disp('oTg: Cinematica Directa c/ variaveis simbolicas:')
@@ -158,7 +154,7 @@ while(select ~= STOP)
         % Inversa da Jacobiana x Velocidades em XYZ 
         qVelocidades = inv(Jac_)*[ Vx 0 0 ]';  
         disp(' ')
-        disp('Expresoes para a velocidade das juntas p/ Vx = 10cm/s:')
+        disp('Expressões para a velocidade das juntas c/ Vx = 10cm/s:')
         disp(' ')
         disp(qVelocidades)
      
@@ -251,7 +247,7 @@ while(select ~= STOP)
                    % Calculo da Inversa do Jacobiano
                    qVelocidades(:,k) = eval(subs(qVelocidades_, q_aux, q_controlo(k,:)));
                    
-                   % Proximas Juntas
+                   % Proximas Juntas: Controlo Malha fechada
                    q_controlo(k+1,:) = q_controlo(k,:) + h*qVelocidades(:,k)';
                    
                    % tx e ty através da Matriz da Cinemática Directa -> f(q(k))
@@ -274,7 +270,8 @@ while(select ~= STOP)
                    
                    % NOTA: Como estamos a dividir o deslocamento a efectuar
                    % pelo Período temos de imeadiato a velocidade a impor
-                   % ou seja, pela parte derivativa do controlo
+                   % no caso c/ parte derivativa do controlo, esta
+                   % corresponde acaba por corresponder a velocidade a impor
                    % ------------------------------------------------------  
                    
                    clc
