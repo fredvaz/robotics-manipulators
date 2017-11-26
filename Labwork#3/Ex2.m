@@ -20,7 +20,6 @@ syms theta1 theta2 d3 theta4 d5
 a    = 50;
 bmin = 40;
 c    = 30;
-tzh = a + bmin + c;
 
 % Junta Rotacional ou Prismatica:
 R = 1; P = 0;
@@ -144,20 +143,20 @@ while(select ~= STOP)
     if select == 2
         
         figure('units','normalized','outerposition',[0 0 1 1]);
-         % Prespectiva de lado do Robot  
+        % Prespectiva de lado do Robot  
         subplot(1,2,1);
         robot.plot(q, 'workspace', [-10 60 -40 40 -10 60], 'reach', ... 
                        1, 'scale', 10, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
                       
         % Prespectiva de topo do Robot -------------------------------------
         
-         subplot(1,2,2);
-         robot.plot(q, 'workspace', [-10 60 -40 40 -10 60],...
-                       'reach', 1,...
-                       'scale', 10,...
-                       'zoom', 0.25,...
-                       'view',...
-                       'top'); % 'trail', 'b.');
+        subplot(1,2,2);
+        robot.plot(q, 'workspace', [-10 60 -40 40 -10 60],...
+                      'reach', 1,...
+                      'scale', 10,...
+                      'zoom', 0.25,...
+                      'view',...
+                      'top'); % 'trail', 'b.');
                    
     disp('#######################################################################') 
     end   
@@ -180,22 +179,21 @@ while(select ~= STOP)
     %% b) Admitindo que se controla unicamente as juntas de rotação theta1, theta2 e a junta prismática b, 
     %     calcule as velocidades de	 funcionamento que permitem seguir a peça
     
-    if select == 4
-        
-        % qVelocidades = Inversa da Jacobiana x Velocidades em XYZ / [ vx vy vz]
-        % c/ Vy = 20cm/s e Vx e Vz = 0 que permite seguir a peça ao longo do Eixo Y
-        % pois só temos temos velocidade em Y. Resultado -> [ W_theta1 W_theta2 V_d3 ] 
-        qVelocidades = inv(Jac_)*[ 0 Vy 0]';  
-        
+    if select == 4        
+        disp('______________________________________________________________________')
         disp(' ')
         disp('Expressões para velocidade das juntas c/ Vy = 20cm/s:')
         disp(' ')
         disp('______________________________________________________________________')
         disp(' ')
+        % qVelocidades = Inversa da Jacobiana x Velocidades em XYZ / [ vx vy vz]
+        % c/ Vy = 20cm/s e Vx e Vz = 0 que permite seguir a peça ao longo do Eixo Y
+        % pois só temos temos velocidade em Y. Resultado -> [ W_theta1 W_theta2 V_d3 ] 
+        qVelocidades = inv(Jac_)*[ 0 Vy 0]';  
+        
         disp(qVelocidades)
         disp(' ')
-        disp('______________________________________________________________________')
-        
+
     disp('#######################################################################')    
     end % fim da alinea b)
     
