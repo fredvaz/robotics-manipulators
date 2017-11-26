@@ -277,15 +277,17 @@ while(select ~= STOP)
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/51)*100), '%'])
+                   disp(['Loading... ', num2str((k/27)*100), '%'])
                    
+                   % Atendendo que que theta4 e d5 são constantes:
                    q_out(k,:) = [q_controlo(k,1) q_controlo(k,2) q_controlo(k,3) q(4:5)];
+                   pos_out(k,:) = bTf(1:3,4,k);
                    
                    k = k + 1;
                end
                
                % PLOT do Robô com velocidades
-               plot_robot2(robot, k, V, qVelocidades, q_out);
+               plot_robot2(robot, k, V, qVelocidades, q_out, pos_out);
                
            end
            %#######################################################################           
