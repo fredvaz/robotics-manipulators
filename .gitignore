@@ -1,8 +1,17 @@
 
 \.DS_Store
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
 
 *.asv
 
 Labwork#3/Ex1\.m~
+<<<<<<< Updated upstream
 
 *.m~
+=======
+>>>>>>> parent of f5407c3... Merge pull request #2 from fredvaz/master
+>>>>>>> Stashed changes
