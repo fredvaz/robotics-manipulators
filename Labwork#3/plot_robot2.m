@@ -7,11 +7,11 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
     figure('units','normalized','outerposition',[0 0 1 1]);
     % Prespectiva de lado do Robô
     subplot(2,3,1);
-    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -10 60 -10 60], 'reach', ... % [-40 60 -10 100 -10 70]
+    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -40 49 -10 60], 'reach', ... % [-40 60 -10 100 -10 70]
         1, 'scale', 8, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
     % Prespectiva de topo do Robô
     subplot(2,3,4);
-    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -10 60 -10 60], 'reach', ...
+    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -40 40 -10 60], 'reach', ...
         1, 'scale', 8, 'zoom', 0.25, 'view', 'top'); % 'trail', 'b.');
 
     % Animação do robô
@@ -26,12 +26,12 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
         subplot(2,3,2);
         v = plot( X(1:i), V(1:i,1)', '.',... % '-'
                   X(1:i), V(1:i,2)', '.',... % 'o'
-                  X(1:i), V(1:i,3)', '.');
+                  X(1:i), V(1:i,3)', 'o');
         title('Velocidades Cartesianas');
         xlabel('k')
-        ylabel('Velocidade Cartesiana (m/s)')
+        ylabel('Velocidade Cartesiana (cm/s)')
         xlim([0 k-1])
-        ylim([-5 100])
+        %ylim([-5 100])
         grid on
 
         % Plot das Velocidades das Juntas
@@ -41,7 +41,7 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
                     X(1:i), qVelocidades(3,1:i), '.');
         title('Velocidades das Juntas');
         xlabel('k')
-        ylabel('Velocidade das Juntas (rad/s e cm/s)')
+        ylabel('Velocidade das Juntas (deg/s e cm/s)')
         xlim([0 k-1])
         grid on
 
@@ -54,7 +54,7 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
         xlabel('k')
         ylabel('Posicao (cm)')
         xlim([0 k-1])
-        ylim([-5 60])
+        ylim([-35 50])
         grid on
         
         % Plot das Juntas
@@ -64,7 +64,7 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
                    X(1:i), q_controlo(1:i,3)', '.');
         title('Juntas');
         xlabel('k')
-        ylabel('Valores Juntas (rad e cm)')
+        ylabel('Valores Juntas (deg e cm)')
         xlim([0 k-1])
         grid on
 

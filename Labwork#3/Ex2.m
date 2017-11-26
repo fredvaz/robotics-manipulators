@@ -31,7 +31,7 @@ PJ_DH = [  theta1      a      0    -pi/2        0           R;   % Junta Rotacio
 %_________________________________________________________________________________
            theta2      0      0     pi/2        0           R;   % Junta Rotacional
 %_________________________________________________________________________________
-                0     d3      0    -pi/2       20           P;   % Junta Prismática
+                0     d3      0    -pi/2        0           P;   % Junta Prismática
 %_________________________________________________________________________________
            theta4      0      0     pi/2        0           R;   % Junta Rotacional
 %_________________________________________________________________________________
@@ -75,35 +75,25 @@ robot = SerialLink(L, 'name', 'Robot Planar RRR');
 
 %% VARIÁVEIS GLOBAIS 
 
-% Inicialização do vector de juntas na nossa posição "home" // ao Eixo do X
-%q = [ 0 pi/2 40 pi/2 30];
+% Inicialização do vector de juntas na nossa posição "home" a começar no
+% no ponto inicial [ bmin, -30, 35] dado no enuciado 
 
-alfa = acos(15/bmin);
-th2 = pi - alfa;
+% POSIÇÃO HOME:
+bTf = [  1  0  0  bmin;
+         0  1  0 -30; 
+         0  0  1  35;  % 5cm do tapete + 30 do c
+         0  0  0  1  ];
+
+[ th1, th2, d3_ ] = inverse_kinematics_ex2(bTf);
+
+alfa = pi - th2;
 th4 = alfa;
 
-q = [ 0 th2 20 th4 30 ]; % Nota: d3 <=> 20 de offset + 20 = 40
+q = [ th1 th2 d3_ th4 c ]; % Nota: d3 = 0 c/ offset = bmin
 
 % Juntas em symbolic p/ resolver o Jacobiano
 q_aux = [ theta1 theta2 d3 theta4 d5 ]; %
 
-% POSIÇÃO HOME:
-
-% Pela cinemática directa
-bTf = eval(subs(oTg, q_aux, q));
-
-
-% Pela cinemática inversa
-
-% bTf = [1  0  0  0  ;
-%        0  1  0  65  ; % olhomento x= 0 e y = 65
-%        0  0  1  tzh;
-%        0  0  0  1  ];
-
-% Cinemática Inversa:
-%[ q_home ] = inverse_kinematics_ex2(bTf);  
-
-       
 % Construir jacobiana 2 partir dos parâmetros calculados na cinemática inversa
 Jac = Jacobian(oTg, Ti, q_aux, PJ_DH(:,6));
 
@@ -156,13 +146,13 @@ while(select ~= STOP)
         figure('units','normalized','outerposition',[0 0 1 1]);
          % Prespectiva de lado do Robot  
         subplot(1,2,1);
-        robot.plot(q, 'workspace', [-10 60 -10 60 -10 60], 'reach', ... 
+        robot.plot(q, 'workspace', [-10 60 -40 40 -10 60], 'reach', ... 
                        1, 'scale', 10, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
                       
         % Prespectiva de topo do Robot -------------------------------------
         
          subplot(1,2,2);
-         robot.plot(q, 'workspace', [-10 60 -10 60 -10 60],...
+         robot.plot(q, 'workspace', [-10 60 -40 40 -10 60],...
                        'reach', 1,...
                        'scale', 10,...
                        'zoom', 0.25,...
@@ -214,10 +204,21 @@ while(select ~= STOP)
     
     if select == 5
                 
-        % Cinemática Inversa?
-        
-        
+        % Definir a Home no ponto inicial [ bmin, -30, 35]
+      
+        % POSIÇÃO HOME:
+        bTf = [  1  0  0  bmin;
+                 0  1  0 -30; 
+                 0  0  1  35;  % 5cm do tapete + 30 do c
+                 0  0  0  1  ];
 
+        [ th1, th2, d3_ ] = inverse_kinematics_ex2(bTf);
+
+        alfa = pi - th2;
+        th4 = alfa;
+
+        q = [ th1 th2 d3_ th4 c ] % Nota: d3 = 0 c/ offset = bmin
+        
     disp('#######################################################################')   
     end % fim da alinea c)
     
@@ -239,7 +240,7 @@ while(select ~= STOP)
            Vz = 0;
            
            % Posição Final do Gripper
-           Xf = bTf(1,4); Yf = 50;
+           Xf = bTf(1,4); Yf = 30;
                               
            % Período de Amostragem dos Controladores 
            h = 0.1;
@@ -277,7 +278,7 @@ while(select ~= STOP)
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/27)*100), '%'])
+                   disp(['Loading... ', num2str((k/32)*100), '%'])
                    
                    % Atendendo que que theta4 e d5 são constantes:
                    q_out(k,:) = [q_controlo(k,1) q_controlo(k,2) q_controlo(k,3) q(4:5)];
@@ -295,14 +296,14 @@ while(select ~= STOP)
            if select2 == 2
                
                % Controlo Propocional kp > 0.65 Instavél 
-               kp = 0.5; 
+               kp = 0.75; % 0.01; só com o k*h*qVelocidades e c/ 0.1 c/ kd = 0.01 temos bons results!
                % Controlo Derivativo
-               kd = 0.65;
+               kd = 0.01;
                
                % Posição Inicial!
                tx_desej = bTf(1,4);
                ty_desej = bTf(2,4);
-               tz_desej = bTf(3,4);
+               tz_desej = 5; % bTf(3,4)
                
                % Deslocamento = Velocidade*Período IDEAL!
                dx = Vx*h; % IDEALMENTE é 0! Queremos manter a pos X
@@ -323,7 +324,7 @@ while(select ~= STOP)
                                      [ q_controlo(k,1:3) q(4:5) ] ));
                    
                    % Proximas Juntas: Controlo Malha fechada
-                   q_controlo(k+1,:) = q_controlo(k,:) + kp*h*qVelocidades(:,k)';
+                   q_controlo(k+1,:) = q_controlo(k,:) + 1*h*qVelocidades(:,k)';
                    
                    % tx e ty através da Matriz da Cinemática Directa
                    bTf(:,:,k+1) = eval(subs(oTg, q_aux,...
@@ -344,9 +345,9 @@ while(select ~= STOP)
                    dy_erro = ty_desej - ty_actual;
                    dz_erro = tz_desej - tz_actual;
                    
-                   Vx = dx_erro/h; % kp*dx_erro + kd*dx_erro/h; 
-                   Vy = dy_erro/h; % kp*dy_erro + kd*dy_erro/h;
-                   Vz = dz_erro/h; % kp*dz_erro + kd*dz_erro/h;
+                   Vx = kp*dx_erro + kd*dx_erro/h; % dx_erro/h; %
+                   Vy = kp*dy_erro + kd*dy_erro/h; % dy_erro/h; %
+                   Vz = kp*dz_erro + kd*dz_erro/h; % dz_erro/h; %
                    
                    % NOTA: Como estamos a dividir o deslocamento a efectuar
                    % pelo Período temos de imeadiato a velocidade a impor
@@ -358,7 +359,7 @@ while(select ~= STOP)
                    % ------------------------------------------------------        
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/27)*100), '%'])
+                   disp(['Loading... ', num2str((k/90)*100), '%'])
                   
                    % Atendendo que que theta4 e d5 são constantes:
                    q_out(k,:) = [q_controlo(k,1) q_controlo(k,2) q_controlo(k,3) q(4:5)];
