@@ -208,14 +208,13 @@ while(select ~= STOP)
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/(50*(-Vx*h)))*100), '%']) 
-                   % Melhorar isto ^ 
+                   disp(['Loading... ', num2str(k/50*100), '%']) 
+                
                    k = k + 1;
                end
                
                % PLOT do Robô com velocidades
                plot_robot(robot, k, V, qVelocidades, q_controlo);
-               % Temos que melhorar a perfomance dos plots!
               
            end
            
@@ -239,7 +238,7 @@ while(select ~= STOP)
                
                while(bTf(1,4,k) > Xf && bTf(2,4) > Yf)
 
-                   % [ Vx vy Vz ]
+                   % [ vx vy vz ]
                    V(k,:) = [ Vx Vy 0 ];
                  
                    % Inversa do Jacobiano x Velocidades em XYZ 
@@ -276,14 +275,13 @@ while(select ~= STOP)
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/(50*(-Vx*h)))*100), '%']) 
-                   % Melhorar isto ^ 
+                   disp(['Loading... ', num2str(k/51*100), '%']) 
+                   
                    k = k + 1;
                end
                
                % PLOT do Robô com velocidades
-               plot_robot(robot, k, V, qVelocidades, q_controlo);
-               % Temos que melhorar a perfomance dos plots!               
+               plot_robot(robot, k, V, qVelocidades, q_controlo);          
              
            end     
            % fim do sub-menu
