@@ -82,7 +82,7 @@ bTf = [  0  -cos(alfa)  sin(alfa)  40;
 
 [ q ] = inverse_kinematics_ex3(bTf, 0);
 
-q = [ q(1:3) 0 ];
+q = eval([ q(1:3) 0 ]);
 
 % Juntas em symbolic p/ resolver o Jacobiano
 q_aux = [ theta1 d2 theta3 ];
