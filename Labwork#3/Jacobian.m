@@ -46,7 +46,7 @@ function Jac = Jacobian(oTg, Ti, q, joint_type)
     I = eye(3,3);   % ºRo
     Rot = eye(3,3); % esta matriz é uma matriz de rotação cumulativa entre as juntas do manipulador
     
-    J_w(:,1) = I*[0 0 1]';  
+    J_w(:,1) = I*[0 0 1]' * joint_type(1);  
     
     
     %Para as restantes juntas
