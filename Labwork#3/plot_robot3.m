@@ -1,17 +1,17 @@
 
 %% PLOT do Robô com velocidades
 
-function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
+function plot_robot3(robot, k, V, qVelocidades, q_controlo, pos)
 
     % Plot segundo o Controlador
     figure('units','normalized','outerposition',[0 0 1 1]);
     % Prespectiva de lado do Robô
     subplot(2,3,1);
-    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -40 40 -10 60], 'reach', ... % [-40 60 -10 100 -10 70]
+    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -10 60 -10 60], 'reach', ... % [-40 60 -10 100 -10 70]
         1, 'scale', 8, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
     % Prespectiva de topo do Robô
     subplot(2,3,4);
-    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -40 40 -10 60], 'reach', ...
+    robot.plot(q_controlo(1,:), 'workspace', [-10 60 -10 60 -10 60], 'reach', ...
         1, 'scale', 8, 'zoom', 0.25, 'view', 'top'); % 'trail', 'b.');
 
     % Animação do robô
@@ -25,13 +25,13 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
         % Plot das Velocidades Cartesianas
         subplot(2,3,2);
         v = plot( X(1:i), V(1:i,1)', '.',... % '-'
-                  X(1:i), V(1:i,2)', '.',... % 'o'
-                  X(1:i), V(1:i,3)', 'o');
-        title('Velocidades Cartesianas');
+                  X(1:i), V(1:i,2)', 'o',... % 'o'
+                  X(1:i), V(1:i,3)', '.');
+        title('Velocidades Impostas');
         xlabel('k')
-        ylabel('Velocidade Cartesiana (cm/s)')
+        ylabel('Velocidade Impostas (cm/s e rad/s)')
         xlim([0 k-1])
-        %ylim([-5 100])
+        ylim([-5 5])
         grid on
 
         % Plot das Velocidades das Juntas
@@ -66,6 +66,7 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
         xlabel('k')
         ylabel('Valores Juntas (deg e cm)')
         xlim([0 k-1])
+        ylim([-1000 3500])
         grid on
 
         %drawnow; %pause(0.05);  % this innocent line prevents the Matlab hang
@@ -74,9 +75,9 @@ function plot_robot2(robot, k, V, qVelocidades, q_controlo, pos)
         % Temos que melhorar a perfomance destes plots!
     end
     
-    legend(v, 'Vx', 'Vy', 'Vz');
-    legend(wth, 'W theta1', 'W theta2', 'V d3');
+    legend(v, 'Vx', 'Vy', 'Wz');
+    legend(wth, 'W theta1', 'V d2''W theta3');
     legend(pos_, 'X', 'Y', 'Z');
-    legend(th, 'Theta1', 'Theta2', ' d3');
+    legend(th, 'Theta1', ' d2', 'Theta3');
 
 end

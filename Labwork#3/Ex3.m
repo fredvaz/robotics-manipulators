@@ -95,18 +95,12 @@ robot = SerialLink(L, 'name', 'Robot Planar RRR');
 % no ponto inicial [ bmin, -30, 35] dado no enuciado 
 
 % POSIÇÃO HOME:
-% bTf = [  0  -cos(alfa)  sin(alfa)  40;
-%          0   sin(alfa)  cos(alfa)  20; 
-%          0   0          0           0;  
-%          0   0          0           1  ];
+bTf = [  0  -cos(alfa)  sin(alfa)  40;
+         0   sin(alfa)  cos(alfa)  20; 
+         0   0          0           0;  
+         0   0          0           1  ];
 
-bTf = [  0   0  0  40;
-         0   0  0  20; 
-         0   0  0   0;  
-         0   0  0   1  ];
-
-
-[ q ] = inverse_kinematics_ex3(bTf);
+[ q ] = inverse_kinematics_ex3(bTf, 0);
 
 q = [ q(1:3) 0 ];
 
@@ -145,17 +139,16 @@ Jac_ = [ Jac(1:2,:); Jac(6,:) ];
 % Variaveis MENU
 select = 0;
 select2 = 0;
-STOP = 6;
+STOP = 5;
 STOP2 = 3;
 
 while(select ~= STOP)
     
     select = menu('Seleccione a acao a realizar:', 'Cinematica Directa',...
-                                                    'Plot do Robo',...
-                                                    'alinea 2)',...
-                                                    'alinea 3)',...
-                                                    'Mover Robot',...
-                                                    'Quit');  
+                                                   'Plot do Robo',...
+                                                   'alinea 3)',...
+                                                   'Mover Robot',...
+                                                   'Quit');  
                                                 
     % Matriz dos parametros de Denavith-Hartenberg: PJ_DH
     if select == 1  
@@ -221,27 +214,19 @@ while(select ~= STOP)
                    
     disp('#######################################################################') 
     end  
-    
-    %% b) Obter a solução para a Cinemática inversa
+
+    %% 3) Calcule as expressões para a velocidade das juntas
     if select == 3
-        
-       
-        disp(' ')
-        disp('#######################################################################')
-    end % fim da alínea a)
-    
-    %% b) Calcule as expressões para a velocidade das juntas
-    if select == 4
         disp('______________________________________________________________________')
         disp(' ')
-        disp('b) Expressões para a velocidade das juntas c/ Vx = 10cm/s:')
+        disp('b) Expressões para a velocidade das juntas c/ Wz = pi rad/s:')
         disp('______________________________________________________________________')
                
-        % Restrição na velocidade x em cm/s
-        Vx = 10; 
+        % Restrição na velocidade Wz
+        Wz = pi; 
         
-        % Inversa da Jacobiana x Velocidades em XYZ 
-        qVelocidades = inv(Jac_)*[ Vx 0 0 ]';  
+        % Inversa da Jacobiana x Velocidades em 
+        qVelocidades = inv(Jac_)*[ 0 0 Wz ]';  
         disp(' ')
         disp('Expressões para a velocidade das juntas c/ Vx = 10cm/s:')
         disp(' ')
@@ -253,7 +238,7 @@ while(select ~= STOP)
     
     %% d) Movimento do manipulador com malha de controlo
     
-    if select == 5
+    if select == 4
         
        % sub-menu
        while(select2 ~= STOP2)
@@ -265,52 +250,49 @@ while(select ~= STOP)
            
            % Velocidades impostas:
            Vx = 0;
-           Vy = 20; % que permite seguir a peça // ao Eixo Y
-           Wz = pi;
-           
-           % Posição Final do Gripper
-           Xf = bTf(1,4); Yf = 30;
-                              
+           Vy = 0; 
+           Wz = pi; % Velocidade angular 
+                                         
            % Período de Amostragem dos Controladores 
            h = 0.1;
            
            % Inicializa as Juntas segundo a Matriz Home/Posição Inicial
-           %[ q_controlo ] = inverse_kinematics_ex2(bTf);
+           alfa_ = 0;
+           oTg = eval(subs(bTf, alfa, alfa_));
            
-           q_controlo = q(1:3); 
-           
+           [ q_controlo ] = inverse_kinematics_ex3(oTg, alfa_);
+                   
            % 1. Abordagem Integradora
            if select2 == 1
                
                k = 1;
                
-               while(bTf(2,4,k) < Yf) % && bTf(1,4) < Xf)
+               while(k < 51) 
                    
-                   % [ Vx vy Vz ] -> Idealmente Vx e Vz = 0 mas! vamos ver
-                   % que o ponto x irá ter um erro em relação ao inicial
-                   % sendo que com o controlo em malha fechada pretende-se
-                   % corrigir tal erro!
-                   V(k,:) = [ Vx Vy Vz ];
+                   % [ Vx Vy Wz ]
+                   V(k,:) = [ Vx Vy Wz ];
                    
                    % Inversa do Jacobiano x Velocidades em XYZ
                    qVelocidades_ = inv(Jac_)*V(k,:)';
                    % Calculo da Inversa do Jacobiano
                    qVelocidades(:,k) = eval(subs(qVelocidades_, q_aux,...
-                                     [ q_controlo(k,1:3) q(4:5) ] ));
+                                                 q_controlo(k,:) ));
                    
                    % Proximas Juntas segundo a Lei de Controlo: Abordagem Integradora
                    q_controlo(k+1,:) = q_controlo(k,:) + h*qVelocidades(:,k)';
                    
+                   
                    % tx e ty através da Matriz da Cinemática Directa
                    bTf(:,:,k+1) = eval(subs(oTg, q_aux,...
-                                [ q_controlo(k,1:3) q(4:5) ] ));
+                                                 q_controlo(k,:) ));
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/32)*100), '%'])
+                   disp(['Loading... ', num2str((k/50)*100), '%'])
                    
-                   % Atendendo que que theta4 e d5 são constantes:
-                   q_out(k,:) = [q_controlo(k,1) q_controlo(k,2) q_controlo(k,3) q(4:5)];
+                   % Atendendo que a junta correspondente ao gripper é fixo
+                   % acrescentamos 0 a ultima junta de forma a trabalharmos na Toolbox 
+                   q_out(k,:) = [ q_controlo(k,1:3) 0 ];
                    pos_out(k,:) = bTf(1:3,4,k);
                    
                    k = k + 1;
@@ -325,80 +307,85 @@ while(select ~= STOP)
            if select2 == 2
                
                % Controlo Propocional kp > 0.65 Instavél 
-               kp = 0.75; % 0.01; só com o k*h*qVelocidades e c/ 0.1 c/ kd = 0.01 temos bons results!
+               kp = 0.1;
                % Controlo Derivativo
                kd = 0.01;
                
                % Posição Inicial!
                tx_desej = bTf(1,4);
                ty_desej = bTf(2,4);
-               tz_desej = 5; % bTf(3,4)
+               
+               alfa_ant = alfa_;
                
                % Deslocamento = Velocidade*Período IDEAL!
-               dx = Vx*h; % IDEALMENTE é 0! Queremos manter a pos X
-               dy = Vy*h;
-               dz = Vz*h; % IDEALMENTE é 0! Queremos manter a pos Z
+               dx = Vx*h; 
+               dy = Vy*h; 
                
                k = 1;
                
-               while(bTf(2,4,k) < Yf) % && bTf(1,4) < Xf)
+               while(k < 121)
                    
                    % [ Vx vy Vz ]
-                   V(k,:) = [ Vx Vy Vz ];
+                   V(k,:) = [ Vx Vy Wz ];
                    
                    % Inversa do Jacobiano x Velocidades em XYZ
                    qVelocidades_ = inv(Jac_)*V(k,:)';
                    % Calculo da Inversa do Jacobiano
                    qVelocidades(:,k) = eval(subs(qVelocidades_, q_aux,...
-                                     [ q_controlo(k,1:3) q(4:5) ] ));
+                                                 q_controlo(k,:) ));
                    
                    % Proximas Juntas: Controlo Malha fechada
-                   q_controlo(k+1,:) = q_controlo(k,:) + 1*h*qVelocidades(:,k)';
+                   q_controlo(k+1,:) = q_controlo(k,:) + kp*h*qVelocidades(:,k)';
                    
                    % tx e ty através da Matriz da Cinemática Directa
                    bTf(:,:,k+1) = eval(subs(oTg, q_aux,...
-                                [ q_controlo(k,1:3) q(4:5) ] ));
+                                                 q_controlo(k,:) ));
                    
                    % ------------------------------------------------------
                    % Guardamos a Posição actual
                    tx_actual = bTf(1,4,k);
                    ty_actual = bTf(2,4,k);
-                   tz_actual = bTf(3,4,k);
+                   alfa_actual = acot(tan(q_controlo(k+1,1) + q_controlo(k+1,3)));
                   
                    % Posição desejada = Posição + Deslocamento IDEAL!
-                   tx_desej = tx_desej + dx; % IDEALMENTE deve-se manter nos ~37
+                   tx_desej = tx_desej + dx;
                    ty_desej = ty_desej + dy;
-                   tz_desej = tz_desej + dz; % IDEALMENTE deve-se manter nos 5
+                   
+                   % Velocidade Angular Desejada em Z
+                   Wz_desej = Wz; % IDEALMENTE é pi rad/s! Queremos manter a vel Wx
                    
                    dx_erro = tx_desej - tx_actual;
                    dy_erro = ty_desej - ty_actual;
-                   dz_erro = tz_desej - tz_actual;
+                   alfa_erro = Wz*h - (alfa_actual - alfa_ant);
                    
-                   Vx = kp*dx_erro + kd*dx_erro/h; % dx_erro/h; %
-                   Vy = kp*dy_erro + kd*dy_erro/h; % dy_erro/h; %
-                   Vz = kp*dz_erro + kd*dz_erro/h; % dz_erro/h; %
+                   alfa_ant = alfa_actual;
+                   
+                   Vx = dx_erro/h; % kp*dx_erro + kd*dx_erro/h; % dx_erro/h; %
+                   Vy = dy_erro/h; % kp*dy_erro + kd*dy_erro/h; % dy_erro/h; %
+                   %Wz = alfa_erro/h; % kp*Wz_erro + kd*Wz_erro/h; % Wz_erro/h; %
                    
                    % NOTA: Como estamos a dividir o deslocamento a efectuar
                    % pelo Período temos de imeadiato a velocidade a impor
                    % no caso c/ parte derivativa do controlo, esta
                    % corresponde acaba por corresponder a velocidade a impor
                    %
-                   % Controlamos a velocidade Vx e Vz na tentativa de
-                   % corrigir o erro em X e Z 
+                   % Controlamos a velocidade Vx e Vy na tentativa de
+                   % corrigir o erro em X e Y
                    % ------------------------------------------------------        
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str((k/90)*100), '%'])
+                   disp(['Loading... ', num2str((k/120)*100), '%'])
                   
-                   % Atendendo que que theta4 e d5 são constantes:
-                   q_out(k,:) = [q_controlo(k,1) q_controlo(k,2) q_controlo(k,3) q(4:5)];
+                   % Atendendo que a junta correspondente ao gripper é fixo
+                   % acrescentamos 0 a ultima junta de forma a trabalharmos na Toolbox 
+                   q_out(k,:) = [ q_controlo(k,1:3) 0 ];
                    pos_out(k,:) = bTf(1:3,4,k);
                    
                    k = k + 1;
                end
                
                % PLOT do Robô com velocidades
-               plot_robot2(robot, k, V, qVelocidades, q_out, pos_out);
+               plot_robot3(robot, k, V, qVelocidades, q_out, pos_out);
  
            end
            %#######################################################################
