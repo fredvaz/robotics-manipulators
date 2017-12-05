@@ -4,18 +4,18 @@ clc
 
 disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 disp('%%                                                                  %%')
-disp('%%          [RobÛtica - 07/11/2017 ~ 26/11/2017] LABWORK#4          %%')
+disp('%%          [Rob√≥tica - 07/11/2017 ~ 26/11/2017] LABWORK#4          %%')
 disp('%%                                                                  %%')
-disp('%%                   Frederico Vaz, n∫ 2011283029                   %%')
-disp('%%                   Paulo Almeida, n∫ 2010128473                   %%')
+disp('%%                   Frederico Vaz, n¬∫ 2011283029                   %%')
+disp('%%                   Paulo Almeida, n¬∫ 2010128473                   %%')
 disp('%%                                                                  %%')
 disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 disp('')
-disp('               INTRODU«√O AO PLANEAMENTO DE TRAJECT”RIAS              ')
+disp('               INTRODU√á√ÉO AO PLANEAMENTO DE TRAJECT√ìRIAS              ')
 disp('')
-disp('*************************** ExercÌcio 1 ******************************')
+disp('*************************** Exerc√≠cio 1 ******************************')
 
-%% Planear	a	trajetÛria	de	um	manipulador	RPR
+%% Planear	a	trajet√≥ria	de	um	manipulador	RPR
 
 syms theta1 d2 theta3
 
@@ -32,21 +32,20 @@ R = 1; P = 0;
 %_________________________________________________________________________________
 PJ_DH = [  theta1      0      0     pi/2     pi/2           R;   % Junta Rotacional
 %_________________________________________________________________________________
-                0     d2      0    -pi/2        0           P;   % Junta Prism·tica
+                0     d2      0    -pi/2        0           P;   % Junta Prism√°tica
 %_________________________________________________________________________________
            theta3      0      0     pi/2        0           R;   % Junta Rotacional
 %_________________________________________________________________________________
-                0     L2      0        0        0           R; ]; % Indiferente (N„o aplic·vel)
+                0     L2      0        0        0           R; ]; % Indiferente (N√£o aplic√°vel)
 %_________________________________________________________________________________
 
-% A cinematica directa da base   atÈ ao Gripper: 
+% A cinematica directa da base   at√© ao Gripper: 
 [ oTg, Ti ] = direct_kinematics(PJ_DH);       
 
 oTg = simplify(oTg);
 Ti  = simplify(Ti) ;
 
-
-%% INICIALIZA«√O DO ROBOT: CRIAR LINKS
+%% INICIALIZA√á√ÉO DO ROBOT: CRIAR LINKS
 
 
 for i = 1 : size(PJ_DH,1)
@@ -59,7 +58,7 @@ for i = 1 : size(PJ_DH,1)
                     'offset', eval(PJ_DH(i,5)));
     end
     
-    if PJ_DH(i,6) == P              % Junta Prism·tica
+    if PJ_DH(i,6) == P              % Junta Prism√°tica
         
         L(i) = Link('theta',eval(PJ_DH(i,1)),...
                     'a', eval(PJ_DH(i,3)),...
@@ -73,12 +72,12 @@ end
 robot = SerialLink(L, 'name', 'Robot Planar RRR');
 
 
-%% VARI¡VEIS GLOBAIS 
+%% VARI√ÅVEIS GLOBAIS 
 
-% InicializaÁ„o do vector de juntas na nossa posiÁ„o "home" a comeÁar no
+% Inicializa√ß√£o do vector de juntas na nossa posi√ß√£o "home" a come√ßar no
 % no ponto inicial [ bmin, -30, 35] dado no enuciado 
 
-% POSI«√O HOME:
+% POSI√á√ÉO HOME:
 bTf = [  0  -cos(alfa)  sin(alfa)  40;
          0   sin(alfa)  cos(alfa)  20; 
          0   0          0           0;  
@@ -91,7 +90,7 @@ q = eval([ q(1:3) 0 ]);
 % Juntas em symbolic p/ resolver o Jacobiano
 q_aux = [ theta1 d2 theta3 ];
 
-% Construir jacobiana 2 partir dos par‚metros calculados na cinem·tica inversa
+% Construir jacobiana 2 partir dos par√¢metros calculados na cinem√°tica inversa
 Jac = Jacobian(oTg, Ti, q_aux, PJ_DH(:,6));
 
 % Componentes de velocidade objectivo [ vx vy wz ]
@@ -116,21 +115,7 @@ while(select ~= STOP)
                                                 
     % Matriz dos parametros de Denavith-Hartenberg: PJ_DH
     if select == 1  
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp('Modelo Cinem·tico Directo do manipulador recorrendo aos par‚metros de D-H :')
-        disp('______________________________________________________________________')
-        disp(' ')
-        PJ_DH_ = SerialLink(L, 'name', 'Robot Planar RRPRP')
-        disp(' ')
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp('a) oTg: Cinematica Directa c/ variaveis simbolicas:')
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp(oTg)
-        disp(' ')
-        disp('______________________________________________________________________')
+
     disp('#######################################################################')   
     end  
     
@@ -152,15 +137,16 @@ while(select ~= STOP)
                       'view',...
                       'top'); % 'trail', 'b.');
 
+
     disp('#######################################################################') 
     end  
 
-    %% a) Calcule expressıes que permitem calcular os valores dos coeficientes das 
-    %     funÁıes polinomiais
+    %% a) Calcule express√µes que permitem calcular os valores dos coeficientes das 
+    %     fun√ß√µes polinomiais
     if select == 3
         disp('______________________________________________________________________')
         disp(' ')
-        disp('b) Expressıes correspondentes aos coeficientes das funÁıes polinomiais:')
+        disp('b) Express√µes correspondentes aos coeficientes das fun√ß√µes polinomiais:')
         disp('______________________________________________________________________')
                
 
@@ -169,13 +155,13 @@ while(select ~= STOP)
     disp('#######################################################################')    
     end % fim da alinea b)
     
-    %% b) Algoritmo que concretize a trajetÛria definida anteriormente.
+    %% b) Algoritmo que concretize a trajet√≥ria definida anteriormente.
     
     if select == 4
         
        
                
-        % PLOT do RobÙ com velocidades
+        % PLOT do Rob√¥ com velocidades
         plot_robot3(robot, k, V, qVelocidades, q_out, pos_out);
  
       
