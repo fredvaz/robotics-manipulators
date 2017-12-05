@@ -1,5 +1,5 @@
 %% Função da Cinemática Inversa do Robot
-%  Consultar inverse_kinematics_ex1.pdf, para melhor compreensão da implementação
+%  Dado no enuciado
 
 function [ q ] = inverse_kinematics_ex1(oTg)
 

@@ -11,20 +11,15 @@ disp('%%                   Paulo Almeida, nº 2010128473                   %%')
 disp('%%                                                                  %%')
 disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 disp(' ')
-
-
 disp('*************************** Exercício 2 ******************************')
 %% Robot 5-DOF (3 de rotação e 2 prismáticos): RRPRP
-
-
 
 syms theta1 theta2 d3 theta4 d5
 
 % Comprimentos dos elos:
 a    = 50;
-bmin = 40 ;
+bmin = 40;
 c    = 30;
-
 
 % Junta Rotacional ou Prismatica:
 R = 1; P = 0;
@@ -35,15 +30,11 @@ PJ_DH = [  theta1      a      0    -pi/2        0           R;   % Junta Rotacio
 %_________________________________________________________________________________
            theta2      0      0     pi/2        0           R;   % Junta Rotacional
 %_________________________________________________________________________________
-<<<<<<< Updated upstream
                 0     d3      0    -pi/2        0           P;   % Junta Prismática
-=======
-                0     d3      0    -pi/2       25           P;   % Junta Prismática
->>>>>>> Stashed changes
 %_________________________________________________________________________________
            theta4      0      0     pi/2        0           R;   % Junta Rotacional
 %_________________________________________________________________________________
-                0     d5      0        0       10           P ]; % Junta Prismática
+                0     d5      0        0        0           P ]; % Junta Prismática
 %_________________________________________________________________________________
 
 % A cinematica directa da base   até ao Gripper: 
@@ -51,20 +42,6 @@ PJ_DH = [  theta1      a      0    -pi/2        0           R;   % Junta Rotacio
 
 oTg = simplify(oTg);
 Ti  = simplify(Ti) ;
-
-
-%% POSIÇÃO HOME:
-
-% % O manipulador encontra-se com a configuração "esticado" completamente na
-% % vertical e com as juntas prismáticas na configuração mínima;
-% 
-% bTf = [1  0  0  0  ;
-%        0  1  0  0  ;
-%        0  0  1  tzh;
-%        0  0  0  1  ;]
-% 
-% % Cinemática Inversa:
-% [ q_home ] = inverse_kinematics_ex2(bTf);   
 
 
 %% INICIALIZAÇÃO DO ROBOT: CRIAR LINKS
@@ -95,7 +72,6 @@ end
 robot = SerialLink(L, 'name', 'Robot Planar RRR');
 
 
-<<<<<<< Updated upstream
 %% VARIÁVEIS GLOBAIS 
 
 % Inicialização do vector de juntas na nossa posição "home" a começar no
@@ -118,27 +94,11 @@ q = [ th1 th2 d3_ th4 c ]; % Nota: d3 = 0 c/ offset = bmin
 q_aux = [ theta1 theta2 d3 theta4 d5 ]; %
 
 % Construir jacobiana 2 partir dos parâmetros calculados na cinemática inversa
-=======
-%% VELOCIDADES
-
-% Inicialização do vector de juntas
-q = [ 0 0 0 0 0 ];
-
-
-% Juntas em symbolic p/ resolver o Jacobiano
-q_aux = [ theta1 theta2 d3 theta4 d5 ];
-       
-% Construir jacobiana a partir dos parâmetros calculados na cinemática inversa
->>>>>>> Stashed changes
 Jac = Jacobian(oTg, Ti, q_aux, PJ_DH(:,6));
 
-% retirar as componentes de velocidade nula [ vz wx wy ]
-Jac_ = [ Jac(1:2,:); Jac(6,:) ];
-        
-% Restrição na velocidade linear em y
-Vy = 20; %[cm/seg]
-        
-
+% retirar as componentes de velocidade nula [ vx vy vz ]
+Jac_ = Jac(1:3,1:3);
+                
 
 %% MENU ("main")
 
@@ -155,6 +115,7 @@ while(select ~= STOP)
                                                     'alinea a)',...
                                                     'alinea b)',...
                                                     'alinea c)',...
+                                                    'alinea d)',...
                                                     'Quit');  
                                                 
     % Matriz dos parametros de Denavith-Hartenberg: PJ_DH
@@ -180,20 +141,15 @@ while(select ~= STOP)
     %% PLOT DO ROBOT:
     
     if select == 2
+        
         figure('units','normalized','outerposition',[0 0 1 1]);
         % Prespectiva de lado do Robot  
         subplot(1,2,1);
-<<<<<<< Updated upstream
         robot.plot(q, 'workspace', [-10 60 -40 40 -10 60], 'reach', ... 
-=======
-        robot.teach(q, 'workspace', [-10 90 -10 90 -10 90], 'reach', ... 
->>>>>>> Stashed changes
                        1, 'scale', 10, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
-                   
-                   
+                      
         % Prespectiva de topo do Robot -------------------------------------
         
-<<<<<<< Updated upstream
         subplot(1,2,2);
         robot.plot(q, 'workspace', [-10 60 -40 40 -10 60],...
                       'reach', 1,...
@@ -201,48 +157,28 @@ while(select ~= STOP)
                       'zoom', 0.25,...
                       'view',...
                       'top'); % 'trail', 'b.');
-=======
-         subplot(1,2,2);
-         robot.plot(q, 'workspace', [-10 90 -10 90 -10 90],...
-                       'reach', 1,...
-                       'scale', 10,...
-                       'zoom', 0.25,...
-                       'view',...
-                       'top'); % 'trail', 'b.');
->>>>>>> Stashed changes
                    
     disp('#######################################################################') 
     end   
 
     %% a) Calcule a matriz Jacobiana do manipulador ºJ
     if select == 3
-        
-       
-
-
-        
-        % Inversa da Jacobiana x Velocidades em XYZ 
-        qVelocidades = Jac_ \ [ 0 Vy 0 ]';  
-        
-        
-        disp(' ')
-        disp('Expresoes para a velocidade das juntas p/ Vx = 10cm/s:')
         disp(' ')
         disp('______________________________________________________________________')
         disp(' ')
-        disp(qVelocidades)
+        disp('Matriz Jacobiana:')
         disp(' ')
         disp('______________________________________________________________________')
-        
-        
+        disp(' ')
+        disp(Jac)
+                
         disp(' ')
         disp('#######################################################################')
     end % fim da alínea a)
     
-    %% b) Admitindo que se controla unicamente as juntas de rotação theta1,theta2 e a junta prismática b, 
-    %     calcule as velocidades de	 funcionamento que permitem seguir a peçaa
+    %% b) Admitindo que se controla unicamente as juntas de rotação theta1, theta2 e a junta prismática b, 
+    %     calcule as velocidades de	 funcionamento que permitem seguir a peça
     
-<<<<<<< Updated upstream
     if select == 4        
         disp('______________________________________________________________________')
         disp(' ')
@@ -258,29 +194,14 @@ while(select ~= STOP)
         disp(qVelocidades)
         disp(' ')
 
-=======
-    if select == 4
-        
-        %
-        
-        
-        
-        % INSERT CODE HERE
-        
-        
-        
-        %        
-        
->>>>>>> Stashed changes
     disp('#######################################################################')    
     end % fim da alinea b)
     
-    %% c) Calcule as expressões	analíticas das variáveis das juntas	?1,?2 e	b em função	dos	
+    %% c) Calcule as expressões	analíticas das variáveis das juntas	theta1,theta2 e	b em função	dos	
     %     parâmetros da trajetória pretendida para a garra (x=bmin, y variável).
     
     if select == 5
                 
-<<<<<<< Updated upstream
         % Definir a Home no ponto inicial [ bmin, -30, 35]
       
         % POSIÇÃO HOME:
@@ -295,114 +216,83 @@ while(select ~= STOP)
         th4 = alfa;
 
         q = [ th1 th2 d3_ th4 c ] % Nota: d3 = 0 c/ offset = bmin
-=======
-        %
-        
-        
-        
-        % INSERT CODE HERE
-        
-        
-
-
-        
-        %        
->>>>>>> Stashed changes
         
     disp('#######################################################################')   
     end % fim da alinea c)
     
-
-    %% d) Movimento do manipulador com malha de controlo      [FALTA ADAPTAR]
+    %% d) Movimento do manipulador com malha de controlo
     
     if select == 6
         
        % sub-menu
        while(select2 ~= STOP2)
+                     
+           select2 = menu('Seleccione a abordagem desejada: ', 'Integrador',...
+                                                               'Malha-Fechada',...
+                                                               'Back');                                              
+           %#######################################################################        
            
-
-           % Posição home/inicial do Gripper do Robot
-           tx = 0; 
-           ty = 0;
-           tz = a + b + c;
-
+           % Velocidades impostas:
+           Vx = 0;
+           Vy = 20; % que permite seguir a peça // ao Eixo Y
+           Vz = 0;
            
-<<<<<<< Updated upstream
            % Posição Final do Gripper
            Xf = bTf(1,4); Yf = 30;
                               
            % Período de Amostragem dos Controladores 
-=======
-           % Perído de Amostragem
->>>>>>> Stashed changes
            h = 0.1;
            
-           select2 = menu('Seleccione a abordagem desejada: ', 'Integrador',...
-                                                               'Malha-Fechada',...
-                                                               'Back');
-           %#######################################################################                                                    'Back'); 
+           % Inicializa as Juntas segundo a Matriz Home/Posição Inicial
+           %[ q_controlo ] = inverse_kinematics_ex2(bTf);
+           
+           q_controlo = q(1:3); 
+           
            % 1. Abordagem Integradora
            if select2 == 1
                
-               for i=1:1:10
-                   % Vector de Translação
-                   P = [ tx ty 10 ];
+               k = 1;
+               
+               while(bTf(2,4,k) < Yf) % && bTf(1,4) < Xf)
                    
-                   % Manter orientação do Gripper na posição home/inicial
-                   % Significa manter a Matriz de Rotação da posição home/inicial
-                   oTg_actual = [ bTf(1:3,1:3); P';
-
-                                  0    0   0    1  ];
-
+                   % [ Vx vy Vz ] -> Idealmente Vx e Vz = 0 mas! vamos ver
+                   % que o ponto x irá ter um erro em relação ao inicial
+                   % sendo que com o controlo em malha fechada pretende-se
+                   % corrigir tal erro!
+                   V(k,:) = [ Vx Vy Vz ];
                    
-                   % Obter os angulos para segund a posição
-                   [ q ] = inverse_kinematics_ex1(oTg_actual);
+                   % Inversa do Jacobiano x Velocidades em XYZ
+                   qVelocidades_ = inv(Jac_)*V(k,:)';
+                   % Calculo da Inversa do Jacobiano
+                   qVelocidades(:,k) = eval(subs(qVelocidades_, q_aux,...
+                                     [ q_controlo(k,1:3) q(4:5) ] ));
                    
-                   % Jacobiando das velocidades nas Juntas
-                   qVelocidades = eval(subs(qVelocidades, q_aux, q));
+                   % Proximas Juntas segundo a Lei de Controlo: Abordagem Integradora
+                   q_controlo(k+1,:) = q_controlo(k,:) + h*qVelocidades(:,k)';
                    
-<<<<<<< HEAD
+                   % tx e ty através da Matriz da Cinemática Directa
+                   bTf(:,:,k+1) = eval(subs(oTg, q_aux,...
+                                [ q_controlo(k,1:3) q(4:5) ] ));
+                   
                    clc
                    disp(' ')
                    disp(['Loading... ', num2str((k/32)*100), '%'])
                    
                    % Atendendo que que theta4 e d5 são constantes:
                    q_out(k,:) = [q_controlo(k,1) q_controlo(k,2) q_controlo(k,3) q(4:5)];
-<<<<<<< Updated upstream
                    pos_out(k,:) = bTf(1:3,4,k);
-=======
-=======
-                   % Lei de Controlo: Abordagem Integradora
-                   q(i+1) = q(i) + h*qVelocidades;
                    
->>>>>>> parent of f5407c3... Merge pull request #2 from fredvaz/master
->>>>>>> Stashed changes
-                   
+                   k = k + 1;
                end
                
-<<<<<<< HEAD
                % PLOT do Robô com velocidades
                plot_robot2(robot, k, V, qVelocidades, q_out, pos_out);
                
-=======
-               % Teste do Plot
-               figure('units','normalized','outerposition',[0 0 1 1]);
-               % Prespectiva de lado do Robot
-               subplot(1,2,1);
-               robot.plot(q, 'workspace', [-10 90 -10 90 -10 90], 'reach', ...
-                   1, 'scale', 10, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
-               % Prespectiva de topo do Robot
-               subplot(1,2,2);
-               robot.plot(q, 'workspace', [-10 90 -10 90 -10 90], 'reach', ...
-                   1, 'scale', 10, 'zoom', 0.25, 'view', 'top'); % 'trail', 'b.');
-               %
->>>>>>> parent of f5407c3... Merge pull request #2 from fredvaz/master
            end
            %#######################################################################           
            % 2. Abordagem em malha-fechada
            if select2 == 2
                
-<<<<<<< Updated upstream
                % Controlo Propocional kp > 0.65 Instavél 
                kp = 0.75; % 0.01; só com o k*h*qVelocidades e c/ 0.1 c/ kd = 0.01 temos bons results!
                % Controlo Derivativo
@@ -412,15 +302,14 @@ while(select ~= STOP)
                tx_desej = bTf(1,4);
                ty_desej = bTf(2,4);
                tz_desej = 5; % bTf(3,4)
-=======
-               %
                
->>>>>>> Stashed changes
+               % Deslocamento = Velocidade*Período IDEAL!
+               dx = Vx*h; % IDEALMENTE é 0! Queremos manter a pos X
+               dy = Vy*h;
+               dz = Vz*h; % IDEALMENTE é 0! Queremos manter a pos Z
                
+               k = 1;
                
-               % INSERT CODE HERE
-               
-<<<<<<< Updated upstream
                while(bTf(2,4,k) < Yf) % && bTf(1,4) < Xf)
                    
                    % [ Vx vy Vz ]
@@ -476,22 +365,14 @@ while(select ~= STOP)
                    
                    k = k + 1;
                end
-=======
->>>>>>> Stashed changes
                
-               
-               %
-
-               
+               % PLOT do Robô com velocidades
+               plot_robot2(robot, k, V, qVelocidades, q_out, pos_out);
+ 
            end
            %#######################################################################
            
        end % fim do sub-menu
-      
- 
+    end % fim da alínea d)
     disp('#######################################################################')   
-    end % fim da alinea d)
-    
-
 end % fim do menu/ fim do exercicio
-
