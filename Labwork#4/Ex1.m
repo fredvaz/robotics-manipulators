@@ -50,25 +50,7 @@ PJ_DH = [  theta1      0      0     pi/2     pi/2           R;   % Junta Rotacio
 oTg = simplify(oTg);
 Ti  = simplify(Ti) ;
 
-<<<<<<< Updated upstream
-=======
 
-%% POSIÇÃO HOME:
-
-
-
-% % O manipulador encontra-se com a configuração "esticado" completamente na
-% % vertical e com as juntas prismáticas na configuração mínima;
-% 
-% bTf = [1  0  0  0  ;
-%        0  1  0  0  ;
-%        0  0  1  tzh;
-%        0  0  0  1  ;]
-% 
-% Cinemática Inversa:
-[ q_home ] = inverse_kinematics_ex3(oTg)
-
->>>>>>> Stashed changes
 
 %% INICIALIZAÇÃO DO ROBOT: CRIAR LINKS
 
@@ -162,25 +144,15 @@ while(select ~= STOP)
                                                 
     % Matriz dos parametros de Denavith-Hartenberg: PJ_DH
     if select == 1  
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp('Modelo Cinemático Directo do manipulador recorrendo aos parâmetros de D-H :')
-        disp('______________________________________________________________________')
-        disp(' ')
-        PJ_DH_ = SerialLink(L, 'name', 'Robot Planar RRPRP')
-        disp(' ')
-        disp('______________________________________________________________________')
-        disp(' ')
-<<<<<<< Updated upstream
-        disp('a) oTg: Cinematica Directa c/ variaveis simbolicas:')
-=======
-        disp('oTg: Cinematica Directa c/ variaveis Simbolicas:')
->>>>>>> Stashed changes
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp(oTg)
-        disp(' ')
-        disp('______________________________________________________________________')
+
+        
+        
+        
+        
+        
+        
+        
+        
     disp('#######################################################################')   
     end  
     
@@ -192,7 +164,6 @@ while(select ~= STOP)
         
         % Side view ------------------------------------
         subplot(1,2,1);
-<<<<<<< Updated upstream
         robot.plot(q, 'workspace', [-10 90 -10 90 -10 90], 'reach', ... 
                        1, 'scale', 10, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
                    
@@ -204,23 +175,7 @@ while(select ~= STOP)
                       'zoom', 0.25,...
                       'view',...
                       'top'); % 'trail', 'b.');
-=======
-        robot.teach(q, 'workspace', [-10 90 -10 90 -10 90],...
-                       'reach', 1,...
-                       'scale', 10,...
-                       'zoom', 0.25);
-                   
-                   
-        % Top view -------------------------------------
-        
-         subplot(1,2,2);
-         robot.plot(q, 'workspace', [-10 90 -10 90 -10 90],...
-                       'reach', 1,...
-                       'scale', 10,...
-                       'zoom', 0.25,...
-                       'view',...
-                       'top'); % 'trail', 'b.');
->>>>>>> Stashed changes
+
                    
     disp('#######################################################################') 
     end  
