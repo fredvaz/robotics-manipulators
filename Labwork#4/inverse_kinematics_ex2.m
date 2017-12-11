@@ -14,11 +14,11 @@ tz = oTg(3,4);
 
 theta1 = atan2(ty, tx);
 
-theta2 = atan2( tz - d1, tx*cos(theta1) + ty*Sin(theta1));
+theta2 = atan2( tz - d1, tx*cos(theta1) + ty*sin(theta1));
 
 % vector com parâmetros das juntas:
 
-q = [ theta1 theta2 ];
+q = [theta1 theta2 0];
 
 
 end

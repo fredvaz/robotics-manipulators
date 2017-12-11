@@ -1,21 +1,21 @@
 
-%% Fun√ß√£o que calcula a matriz Jacobiana de velocidades do "end-effector"
+%% FunÁ„o que calcula a matriz Jacobiana de velocidades do "end-effector"
 %###################################################################################################
 % ARGUMENTOS: 
-%       - <oTg> : matriz de transforma√ß√£o simb√≥lica obtida a partir da
-%         cinem√°tic directa dos par√¢metros de Denavit-Hartenberg;
+%       - <oTg> : matriz de transformaÁ„o simbÛlica obtida a partir da
+%         cinem·tic directa dos par‚metros de Denavit-Hartenberg;
 %
 %       - <Ti> : um conjunto de matrizes elementares obtidas a partir da
-%         da aplic√£o dos par√¢metros de Denavit-Hartenberg para cada uma das
+%         da aplic√£o dos par‚metros de Denavit-Hartenberg para cada uma das
 %         juntas (1 matriz/junta);
 %
-%       - <q> : vector que cont√©m os par√¢metros do manipulador a controlar,
-%         se se tratar de uma junta rotacional o par√¢metro ser√° do tipo
-%         "theta_" ou se pelo conrt√°rio for uma junta prism√°ticao
-%         par√¢metro √© da forma "d_";
+%       - <q> : vector que contÈm os par‚metros do manipulador a controlar,
+%         se se tratar de uma junta rotacional o par‚metro ser· do tipo
+%         "theta_" ou se pelo contr·rio for uma junta prism·ticao
+%         par‚metro È da forma "d_";
 %
-%       - <joint_type> : um vector , cont√™m 0's e 1's para identificar o tipo
-%         de junta do manipulador (rotacional ou prism√°tica);
+%       - <joint_type> : um vector , contÈm 0's e 1's para identificar o tipo
+%         de junta do manipulador (rotacional ou prism·tica);
 %
 %###################################################################################################
 
@@ -26,7 +26,7 @@ function Jac = Jacobian(oTg, Ti, q, joint_type)
     
     % calcular velocidade linear
    
-    % 1¬∫ ir buscar as posi√ß√£o atrav√©s da matriz de transforma√ß√£o do robot 
+    % 1¬∫ ir buscar as posiÁ„o atravÈs da matriz de transformaÁ„o do robot 
     % para o gripper:
     
     tx = oTg(1,4);
@@ -44,7 +44,7 @@ function Jac = Jacobian(oTg, Ti, q, joint_type)
 
     % caso particular: primeira junta
     I = eye(3,3);   % ¬∫Ro
-    Rot = eye(3,3); % esta matriz √© uma matriz de rota√ß√£o cumulativa entre as juntas do manipulador
+    Rot = eye(3,3); % esta matriz È uma matriz de rotaÁ„o cumulativa entre as juntas do manipulador
     
     J_w(:,1) = I*[0 0 1]' * joint_type(1);  
     
@@ -57,7 +57,7 @@ function Jac = Jacobian(oTg, Ti, q, joint_type)
         J_w = [J_w      Rot * [0 0 1]' * joint_type(i)]; % actualiza a matriz com o valor actual, a multiplic√£o cumulativa
         
     end
-    % se a junta prism√°tica joint_type = 0, o que d√° uma velocidade angular nula
+    % se a junta prism·tica joint_type = 0, o que d· uma velocidade angular nula
     % devolve vector "qsi", contem as duas componentes de velocidade das juntas
     % do robot, velocidade linear e velocidae angular
 
