@@ -57,17 +57,17 @@ Ti  = simplify(Ti) ;
 
 %% transformações para os pontos que definem a trajectória do mamnipulador
 
-0_T_A = [ 0   0.9659    0.2588   21.4720 ;
+A_T_0 = [ 0   0.9659    0.2588   21.4720 ;
           0   -0.2588   0.9659   22.1791 ;
           1     0         0         0    ;
           0     0         0         1   ];
       
-0_T_i = [ 0   0.9659    0.2588   26.2396 ;
+i_T_0 = [ 0   0.9659    0.2588   26.2396 ;
           0   -0.2588   0.9659   15.9659 ;
           1     0         0         0    ;
           0     0         0         1   ];
       
-0_T_B = [ 0   0.8660     -0.5     12.0   ;
+B_T_0 = [ 0   0.8660     -0.5     12.0   ;
           0    0.5      0.8660   22.5167 ;
           1     0         0         0    ;
           0     0         0         1   ];
@@ -105,7 +105,7 @@ robot = SerialLink(L, 'name', 'Robot Planar RRR');
 %% VARIÁVEIS GLOBAIS 
 
 
-% % POSIÁO HOME:
+% % POSIÇÃO HOME:
 
 [ q ] = inverse_kinematics_ex1(oTg)
 
@@ -120,15 +120,15 @@ robot = SerialLink(L, 'name', 'Robot Planar RRR');
 % Jac_ = [ Jac(1:2, 1:3); Jac(6,1:3) ];
 
 
-%% PLANEAMENTO DO ESPAÇO DAS JUNTAS
+%% PLANEAMENTO NO ESPAÇO DAS JUNTAS
 
 % NOTA: o vector <q> representa os valores das juntas 
                    
 
-
-for t = 0 : 0.01 : 1
-    posicao = calcula_trajectoria(t, t0, tf, theta0, thetaf, delta_t, v_juntas0, v_juntasf);
-end
+% 
+% for t = 0 : 0.01 : 1
+%     posicao = calcula_trajectoria(t, t0, tf, theta0, thetaf, delta_t, v_juntas0, v_juntasf);
+% end
                    
                 
 
