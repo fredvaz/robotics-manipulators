@@ -1,12 +1,20 @@
-function [velocidade_juntas] = calcula_velocidade()
+function [velocidade_juntas] = calcula_velocidade(theta, T)
 
-if sign() ~= sign()
-    velocidade_juntas = 0;
+
+
+for i = 2 : 1 : (size(T)-1) % percorre os troços da trajectória
+    for k = 1 : 1 : size(theta) % percorre as juntas do manipulador
+        
+        if sign(q_juntas(i,k) - q_juntas(i,k-1)) ~= sign(q_juntas(i,k+1) - q_juntas(i,k))
+            
+            velocidade_juntas = 0;
+        
+        else
+            velocidade_juntas = (1/2)*(  ((theta(i,k+1)-theta(i,k))  /  (T(i+1)-T(i)))  +  ...
+                                         ((theta(i,k)-theta(i,k-1))  /  (T(i)-T(i-1)))  );
+        end
+        
+        
+    end
 end
-
-else
-    velocidade_juntas = (1/2)*(  ((theta(i+1)-theta(i))/(t(i+1)-t(i)))  +  ...
-                                 ((theta(i)-theta(i-1))/(t(i)-t(i-1)))  );
-end
-
 end

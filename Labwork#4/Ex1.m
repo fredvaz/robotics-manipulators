@@ -85,14 +85,14 @@ robot = SerialLink(L, 'name', 'Robot Planar RRR');
 
 %% PLOT DO ROBOT (para testar)
 
-q = [ 0 0 0 0 ];
-
-figure('units','normalized','outerposition',[0 0 1 1]);
-subplot(1,2,1);
-robot.teach(q, 'workspace', [-10 40 -10 40 -10 40],...
-              'reach', 1,...
-              'scale', 10,...
-              'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
+q_inicializacao = [ 0 0 0 0 ];
+% 
+% figure('units','normalized','outerposition',[0 0 1 1]);
+% subplot(1,2,1);
+% robot.teach(q_inicializacao, 'workspace', [-10 40 -10 40 -10 40],...
+%               'reach', 1,...
+%               'scale', 10,...
+%               'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
           
   
           
@@ -120,18 +120,18 @@ B_T_0 = [ 0   0.8660     -0.5     12.0   ;
 % TRAJECTÓRIA DESEJADOS 
 
 % valores das juntas para o ponto A
-[ qA ] = inverse_kinematics_ex1(A_T_0)
+[ qA ] = inverse_kinematics_ex1(A_T_0);
 
 % valores das juntas para o ponto intermédio (pi)
-[ qi ] = inverse_kinematics_ex1(i_T_0)
+[ qi ] = inverse_kinematics_ex1(i_T_0);
 
 % valores das juntas para o ponto B
-[ qB ] = inverse_kinematics_ex1(B_T_0)          
+[ qB ] = inverse_kinematics_ex1(B_T_0);         
           
-
+q_juntas = [qA' qi' qB'];
 
 %% VELOCIDADES
-
+T = [0 5 8]; %vector com os instantes dos pontos do percurso
 
 
 %% PLANEAMENTO NO ESPAÇO DAS JUNTAS
