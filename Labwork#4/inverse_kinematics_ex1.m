@@ -15,7 +15,7 @@ ay = oTg(2,3);
 
 theta1 = atan2( ty - 10 * ay, tx - 10 * ax);
 
-d2 = cos(theta1) * (tx - 10 * ax) + sin(theta1) * (ty - 10 * ay); 
+d2 = (cos(theta1)*(tx - 10 * ax)) + (sin(theta1) * (ty - 10 * ay)); 
 
 theta3 = atan2(ay,ax) - theta1;
 

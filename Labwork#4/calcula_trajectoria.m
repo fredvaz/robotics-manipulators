@@ -2,6 +2,8 @@
 %% DESCRIÇÃO: Implementa a equação polinomial  de 3ª ordem com componentes de posição e velocidade;
 % garante que a trajectória satisfaz uma posição e velocidade final
 % desejada.
+% - Continuidade e suavidade nas velocidades e acelerações das juntas;
+% - Evitar solicitações desmesuradas e irregulares nos actuadores.
 %###################################################################################################
 % ARGUMENTOS: 
 %       - <t> : variável simbólica para o tempo;
