@@ -189,22 +189,8 @@ while(select ~= STOP)
     
     if select == 3
         
-        % Plot segundo o Controlador
-        figure('units','normalized','outerposition',[0 0 1 1]);
-        % Prespectiva de lado do Robô
-        subplot(1,2,1);
-        robot.plot([q_traj(1,:) 0], 'workspace', [-10 60 -10 40 -10 30], 'reach', ... % [-40 60 -10 100 -10 70]
-            1, 'scale', 10, 'zoom', 0.5); % 'view', 'top', 'trail', 'b.');
-        % Prespectiva de topo do Robô
-        subplot(1,2,2);
-        robot.plot([q_traj(1,:) 0], 'workspace', [-10 60 -10 40 -10 30], 'reach', ...
-            1, 'scale', 10, 'zoom', 0.5, 'view', 'top'); % 'trail', 'b.');
+        plotRobot1(robot, pos, q_traj, A_T_0, i_T_0, B_T_0);
         
-        for i=1:size(q_traj,1)
-            
-            robot.animate([q_traj(i,:) 0]);
-            
-        end
     end
-    %
+          
 end

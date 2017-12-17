@@ -209,53 +209,19 @@ while(select ~= STOP)
         disp('Trajectoria efectuada A->B->C pelo robô.')
         disp('______________________________________________________________________')
         
-        % Plot segundo a Trajectória acima defenida
-        figure('units','normalized','outerposition',[0 0 1 1]);
-        % Prespectiva de lado do Robô
-        subplot(1,2,1);
+        % Vector com os instantes de passagem nos pontos do percurso A->B->C
+        t = [ 0 4 10 ]; 
+
+        % Vector c/ valor das juntas nos pontos de passagens
+        q = [ qA; qB; qC ]; % Se fizermo para mais instantes é reptir estes pontos
+
+        % Cálcula as velocidades para cada junta em cada instante
+        v_q = calcula_velocidade(q, t);
         
-        plot3(pos(:,1), pos(:,2),  pos(:,3), 'b');
-        hold on
-        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
-        hold on
-        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'r+');
-        hold on
-        plot3(C_T_0(1,4), C_T_0(2,4), C_T_0(3,4), 'rx');
-        hold on
-        xlim([-0.5 1])
-        ylim([-0.5 1])
-        zlim([-0.5 1.5])
+        % Cálcula trajectória para as respectivas juntas
+        [ pos, q_traj ] = calcula_trajectoria(oTg, t, q_aux, q, v_q, h);
         
-        grid on
-        
-        robot.plot(q_traj(1,:), 'workspace', [-0.5 1 -0.5 1 -0.5 1.5], ...
-            'scale', 0.5, 'zoom', 1); % 'view', 'top', 'trail', 'b.');
-        
-        % Prespectiva de topo do Robô
-        subplot(1,2,2);
-        
-        plot3(pos(:,1), pos(:,2),  pos(:,3), 'b');
-        hold on
-        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
-        hold on
-        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'r+');
-        hold on
-        plot3(C_T_0(1,4), C_T_0(2,4), C_T_0(3,4), 'rx');
-        hold on
-        xlim([-0.5 1])
-        ylim([-0.5 1])
-        zlim([-0.5 1.5])
-        
-        grid on
-        
-        robot.plot(q_traj(1,:), 'workspace', [-0.5 1 -0.5 1 -0.5 1.5], ...
-            'scale', 0.5, 'zoom', 1, 'view', 'top'); % 'trail', 'b.');
-        
-        for i=2:size(q_traj,1)
-            
-            robot.animate(q_traj(i,:));
-            
-        end
+        plotRobot2(robot, pos, q_traj, A_T_0, B_T_0, C_T_0);
         
         disp('#######################################################################')
     end % fim da alinea a)
@@ -271,7 +237,7 @@ while(select ~= STOP)
         t = [ 0 4 10 12 16 22 24 28 34 ];
         
         % Vector c/ valor das juntas nos pontos de passagens ; qB; qC
-        q = [ qA; qB; qC; qA; qB; qC; qA; qB; qC ]; % Se fizermo para mais instantes é reptir estes pontos
+        q = [ qA; qB; qC; qA; qB; qC; qA; qB; qC ]; % Se fizermos para mais instantes é reptir estes pontos
         
         % Cálcula as velocidades para cada junta em cada instante
         v_q = calcula_velocidade(q, t);
@@ -279,113 +245,21 @@ while(select ~= STOP)
         % Cálcula trajectória para as respectivas juntas
         [ pos, q_traj ] = calcula_trajectoria(oTg, t, q_aux, q, v_q, h);
         
-        % Plot segundo a Trajectória acima defenida
-        figure('units','normalized','outerposition',[0 0 1 1]);
-        % Prespectiva de lado do Robô
-        subplot(1,2,1);
-        
-        plot3(pos(:,1), pos(:,2),  pos(:,3), 'b');
-        hold on
-        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
-        hold on
-        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'r+');
-        hold on
-        plot3(C_T_0(1,4), C_T_0(2,4), C_T_0(3,4), 'rx');
-        hold on
-        xlim([-0.5 1])
-        ylim([-0.5 1])
-        zlim([-0.5 1.5])
-        
-        grid on
-        
-        robot.plot(q_traj(1,:), 'workspace', [-0.5 1 -0.5 1 -0.5 1.5], ...
-            'scale', 0.5, 'zoom', 1); % , 'trail', 'b.'); % 'view', 'top');
-        
-        % Prespectiva de topo do Robô
-        subplot(1,2,2);
-        
-        plot3(pos(:,1), pos(:,2),  pos(:,3), 'b');
-        hold on
-        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
-        hold on
-        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'r+');
-        hold on
-        plot3(C_T_0(1,4), C_T_0(2,4), C_T_0(3,4), 'rx');
-        hold on
-        xlim([-0.5 1])
-        ylim([-0.5 1])
-        zlim([-0.5 1.5])
-        
-        grid on
-        
-        robot.plot(q_traj(1,:), 'workspace', [-0.5 1 -0.5 1 -0.5 1.5], ...
-            'scale', 0.5, 'zoom', 1, 'view', 'top'); % 'trail', 'b.');
-        
-        for i=2:size(q_traj,1)
-            
-            robot.animate(q_traj(i,:));
-            
-        end
+        plotRobot2(robot, pos, q_traj, A_T_0, B_T_0, C_T_0);
         
         disp('#######################################################################')
     end
     
-    %% d) Movimento do manipulador segundo a trajectória A->B->C->A->B->C->...
+    %% d) Movimento do manipulador adoptando funções parabólicas
     if select == 4
         
-       a_max = deg2rad(100);
+       a_max = deg2rad(300);
         
        [ pos, q_traj ] = calcula_trajectoria2(oTg, a_max, q, t, h);
        
-       % Plot segundo a Trajectória acima defenida
-        figure('units','normalized','outerposition',[0 0 1 1]);
-        % Prespectiva de lado do Robô
-        subplot(1,2,1);
+       plotRobot2(robot, pos, q_traj, A_T_0, B_T_0, C_T_0);
         
-        plot3(pos(:,1), pos(:,2),  pos(:,3), 'b');
-        hold on
-        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
-        hold on
-        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'r+');
-        hold on
-        plot3(C_T_0(1,4), C_T_0(2,4), C_T_0(3,4), 'rx');
-        hold on
-        xlim([-0.5 1])
-        ylim([-0.5 1])
-        zlim([-0.5 1.5])
-        
-        grid on
-        
-        robot.plot(q_traj(1,:), 'workspace', [-0.5 1 -0.5 1 -0.5 1.5], ...
-            'scale', 0.5, 'zoom', 1); % , 'trail', 'b.'); % 'view', 'top');
-        
-        % Prespectiva de topo do Robô
-        subplot(1,2,2);
-        
-        plot3(pos(:,1), pos(:,2),  pos(:,3), 'b');
-        hold on
-        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
-        hold on
-        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'r+');
-        hold on
-        plot3(C_T_0(1,4), C_T_0(2,4), C_T_0(3,4), 'rx');
-        hold on
-        xlim([-0.5 1])
-        ylim([-0.5 1])
-        zlim([-0.5 1.5])
-        
-        grid on
-        
-        robot.plot(q_traj(1,:), 'workspace', [-0.5 1 -0.5 1 -0.5 1.5], ...
-            'scale', 0.5, 'zoom', 1, 'view', 'top'); % 'trail', 'b.');
-        
-        for i=2:size(q_traj,1)
-            
-            robot.animate(q_traj(i,:));
-            
-        end
-        
-        disp('#######################################################################')
+       disp('#######################################################################')
     end
     %
 end
