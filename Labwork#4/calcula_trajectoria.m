@@ -23,15 +23,15 @@
 %
 %###################################################################################################
 
-function [ pos, q_traj ] = calcula_trajectoria(oTg, t, q, v_q, h)
+function [ pos, q_traj ] = calcula_trajectoria(oTg, t, q_aux, q, v_q, h)
 
 syms theta1 d2 theta3
 
 count = 1;
 
-for i=1:size(t,2)-1
-    for th=t(i):h:t(i+1)-h
-        for k=1:1:size(q,2)
+for i=1:size(t,2)-1 % Para cada instante i - linhas (um ponto)
+    for th=t(i):h:t(i+1)-h % Amostragem de pontos da trajectoria entre pontos/instantes
+        for k=1:1:size(q,2) % Para cada junta k - colunas
 
             ti = t(i);
             tf = t(i+1);
@@ -54,8 +54,8 @@ for i=1:size(t,2)-1
             
         end
         % Calcula posições
-        oTg_ = eval(subs(oTg, [theta1, d2, theta3], q_traj(count,:)));
-        pos(count,:) = [ oTg_(1,4) oTg_(2,4)];
+        oTg_ = eval(subs(oTg, q_aux, q_traj(count,:)));
+        pos(count,:) = [ oTg_(1,4) oTg_(2,4) oTg_(3,4) ];
         
         count = count + 1;
     end

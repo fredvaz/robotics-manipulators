@@ -18,7 +18,7 @@ theta2 = atan2( tz - d1, tx*cos(theta1) + ty*sin(theta1));
 
 % vector com parâmetros das juntas:
 
-q = [theta1 theta2 0];
+q = [ theta1 theta2 ];
 
 
 end

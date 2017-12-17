@@ -41,7 +41,6 @@ PJ_DH = [  theta1      0      0     pi/2     pi/2           R;   % Junta Rotacio
                 0     L2      0        0        0           R ]; % Indiferente (Não aplicável)
 %_________________________________________________________________________________
 
-
 % A cinematica directa da base   até ao Gripper: 
 [ oTg, Ti ] = direct_kinematics(PJ_DH);       
 
@@ -50,7 +49,6 @@ Ti  = simplify(Ti) ;
 
 
 %% INICIALIZAÇÃO DO ROBOT: CRIAR LINKS
-
 
 for i = 1 : size(PJ_DH,1)
     
@@ -70,10 +68,10 @@ for i = 1 : size(PJ_DH,1)
                     'offset', eval(PJ_DH(i,5)),...
                     'qlim', [25 50]);
     end
-
 end
 
 robot = SerialLink(L, 'name', 'Robot Planar RRR');
+
 
 %% VARIÁVEIS GLOBAIS 
 
@@ -115,10 +113,10 @@ B_T_0 = [ 0   0.8660     -0.5     12.0   ;
 [ qB ] = inverse_kinematics_ex1(B_T_0);         
   
 % Vector com os instantes de passagem nos pontos do percurso 
-t = [ 0 5 8 10 15 18 20 25 28 ];
+t = [ 0 5 8];
 
 % Vector c/ valor das juntas nos pontos de passagens
-q = [ qA; qi; qB; qA; qi; qB; qA; qi; qB ]; % Se fizermo para mais instantes é reptir estes pontos
+q = [ qA; qi; qB]; % Se fizermo para mais instantes é reptir estes pontos
 
 % Cálcula as velocidades para cada junta em cada instante 
 v_q = calcula_velocidade(q, t);
@@ -127,7 +125,9 @@ v_q = calcula_velocidade(q, t);
 h = 0.2;
 
 % Cálcula trajectória para as respectivas juntas
-[ pos, q_traj ] = calcula_trajectoria(oTg, t, q, v_q, h);
+q_aux = [theta1, d2, theta3];
+
+[ pos, q_traj ] = calcula_trajectoria(oTg, t, q_aux, q, v_q, h);
 
 
 %% MENU ("main")
@@ -172,10 +172,16 @@ while(select ~= STOP)
         title('Trajectoria a efectuar pelo Robo');
         xlabel('X')
         ylabel('Y')
-        %xlim([0 k-1])
-        %ylim([-5 5])
+
         grid on
         
+        hold on
+        plot3(A_T_0(1,4), A_T_0(2,4), A_T_0(3,4), 'ro');
+        hold on
+        plot3(i_T_0(1,4), i_T_0(2,4), i_T_0(3,4), 'r+');
+        hold on
+        plot3(B_T_0(1,4), B_T_0(2,4), B_T_0(3,4), 'rx');
+
         disp('#######################################################################')
     end % fim da alinea a)
     
