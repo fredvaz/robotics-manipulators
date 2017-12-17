@@ -333,10 +333,9 @@ while(select ~= STOP)
     %% d) Movimento do manipulador segundo a trajectória A->B->C->A->B->C->...
     if select == 4
         
+       a_max = deg2rad(100);
         
-       q_traj = calcula_trajectoria2(qA, qB, qC, deg2rad(300), t, h);
-       
-       
+       [ pos, q_traj ] = calcula_trajectoria2(oTg, a_max, q, t, h);
        
        % Plot segundo a Trajectória acima defenida
         figure('units','normalized','outerposition',[0 0 1 1]);
