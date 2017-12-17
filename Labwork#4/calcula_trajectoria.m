@@ -1,5 +1,5 @@
 
-%% DESCRIÇÃO: Implementa a equação polinomial  de 3ª ordem com componentes de posição e velocidade;
+%% DESCRIÇÃO: Implementa a equação polinomial de 3ª ordem com componentes de posição e velocidade;
 % garante que a trajectória satisfaz uma posição e velocidade final
 % desejada.
 % - Continuidade e suavidade nas velocidades e acelerações das juntas;
@@ -8,28 +8,63 @@
 % ARGUMENTOS: 
 %       - <t> : variável simbólica para o tempo;
 %
-%       - <t0> : instante inicial (t = t0);
+%       - <ti> : instante inicial (t = ti);
 %
-%       - <theta0> : valor das juntas na posição inicial (t = t0);
+%       - <qi> : valor das juntas na posição inicial (t = ti);
 %
-%       - <thetaf> : valor das juntas na posição final;
+%       - <qf> : valor das juntas na posição final;
 %
 %       - <delta_t> : diferença entre tempo no instante final e tempo no
 %       instante inicial;
 %
-%       - <v_juntas0> : velocidade das juntas na posição inicial (com t = t0)
+%       - <v_qi> : velocidade das juntas na posição inicial (com t = ti)
 %
-%       - <v_juntasf> : velocidade dsa juntas na posição final
+%       - <v_qf> : velocidade dsa juntas na posição final
 %
 %###################################################################################################
 
-function [posicao] = calcula_trajectoria(t, t0, theta0, thetaf, delta_t, v_juntas0, v_juntasf)
+function [ pos, q_traj ] = calcula_trajectoria(oTg, t, q, v_q, h)
 
-posicao =                                                                              ...
-                                                                                       ...
-theta0 +                                                                               ... % a0
-v_juntas0*(t - t0) +                                                                   ... % a1*t
-((3/delta_t^2)*(thetaf-theta0)-(2/delta_t)*v_juntas0-(1/delta_t)*v_juntasf)*(t-t0)^2 - ... % a2*t^2
-((2/delta_t^3)*(thetaf-theta0)-(1/delta^2)*(v_juntasf-v_juntas0))*(t-t0)^3;                % a3*t^3
+syms theta1 d2 theta3
 
+count = 1;
+
+for i=1:size(t,2)-1
+    for th=t(i):h:t(i+1)-h
+        for k=1:1:size(q,2)
+
+            ti = t(i);
+            tf = t(i+1);
+            qi = q(i,k);
+            qf = q(i+1,k);
+            v_qi = v_q(i,k);
+            v_qf = v_q(i+1,k);
+            
+            delta_t = tf - ti;
+            
+            q_traj(count,k) = qi +                                    ...  % a0
+                                                                      ...
+                              v_qi*(th - ti) +                        ...  % a1*t
+                                                                      ...
+                              ((3/delta_t^2)*(qf-qi)-(2/delta_t)*v_qi ...
+                              -(1/delta_t)*v_qf)*(th-ti)^2            ...  % a2*t^2
+                                                                      ...
+                              -((2/delta_t^3)*(qf-qi)-(1/delta_t^2)*  ...
+                              (v_qf+v_qi))*(th-ti)^3;                      % a3*t^3
+            
+        end
+        % Calcula posições
+        oTg_ = eval(subs(oTg, [theta1, d2, theta3], q_traj(count,:)));
+        pos(count,:) = [ oTg_(1,4) oTg_(2,4)];
+        
+        count = count + 1;
+    end
 end
+end
+
+
+
+
+
+
+

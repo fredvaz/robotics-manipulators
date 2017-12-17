@@ -19,17 +19,11 @@ disp('*************************** Exercício 1 ******************************')
 
 syms theta1 d2 theta3
 
-% Tempo:
-tA = 0; % instante de tempo no ponto A (instante inicial da trajectória)
-tB = 8; % tempo final em [segundos], instante de tempo no ponto B (fim da trajectória)
-ti = 5; % instante de tempo em que o manipulador passa no ponto intermédio, pi
-
 % Comprimentos dos elos:
 L2 = 10;
 
 % Junta Rotacional ou Prismatica:
 R = 1; P = 0;
-
 
 %% MODELO DE CINEMÁTICA DIRECTA DO MANIPULADOR (NOTA: o modelo cinemático directo é semelhante ao robot
 % implementado no Labwork#3, ex3)
@@ -46,7 +40,6 @@ PJ_DH = [  theta1      0      0     pi/2     pi/2           R;   % Junta Rotacio
 %_________________________________________________________________________________
                 0     L2      0        0        0           R ]; % Indiferente (Não aplicável)
 %_________________________________________________________________________________
-
 
 
 % A cinematica directa da base   até ao Gripper: 
@@ -82,21 +75,14 @@ end
 
 robot = SerialLink(L, 'name', 'Robot Planar RRR');
 
+%% VARIÁVEIS GLOBAIS 
 
-%% PLOT DO ROBOT (para testar)
+% Tempo:
+tA = 0; % instante de tempo no ponto A (instante inicial da trajectória)
+tB = 8; % tempo final em [segundos], instante de tempo no ponto B (fim da trajectória)
+ti = 5; % instante de tempo em que o manipulador passa no ponto intermédio, pi
 
-q_inicializacao = [ 0 0 0 0 ];
-% 
-% figure('units','normalized','outerposition',[0 0 1 1]);
-% subplot(1,2,1);
-% robot.teach(q_inicializacao, 'workspace', [-10 40 -10 40 -10 40],...
-%               'reach', 1,...
-%               'scale', 10,...
-%               'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
-          
-  
-          
-%% transformações para os pontos que definem a trajectória do mamnipulador
+% transformações para os pontos que definem a trajectória do mamnipulador
 
 A_T_0 = [ 0   0.9659    0.2588   21.4720 ;
           0   -0.2588   0.9659   22.1791 ;
@@ -112,37 +98,107 @@ B_T_0 = [ 0   0.8660     -0.5     12.0   ;
           0    0.5      0.8660   22.5167 ;
           1     0         0         0    ;
           0     0         0         1   ];
+    
       
-          
-%% CINEMÁTICA INVERSA
+% CINEMÁTICA INVERSA
 
 % OBTER A CONFIGURAÇÃO DO MANIPULADOR (VALOR DAS JUNTAS) CORRESPONDENTE PARA OS PONTOS DA 
 % TRAJECTÓRIA DESEJADOS 
 
-% valores das juntas para o ponto A
+% Valores das juntas para o ponto A
 [ qA ] = inverse_kinematics_ex1(A_T_0);
 
-% valores das juntas para o ponto intermédio (pi)
+% Valores das juntas para o ponto intermédio (pi)
 [ qi ] = inverse_kinematics_ex1(i_T_0);
 
-% valores das juntas para o ponto B
+% Valores das juntas para o ponto B
 [ qB ] = inverse_kinematics_ex1(B_T_0);         
-          
-q_juntas = [qA' qi' qB'];
+  
+% Vector com os instantes de passagem nos pontos do percurso 
+t = [ 0 5 8 10 15 18 20 25 28 ];
 
-%% VELOCIDADES
-T = [0 5 8]; %vector com os instantes dos pontos do percurso
+% Vector c/ valor das juntas nos pontos de passagens
+q = [ qA; qi; qB; qA; qi; qB; qA; qi; qB ]; % Se fizermo para mais instantes é reptir estes pontos
+
+% Cálcula as velocidades para cada junta em cada instante 
+v_q = calcula_velocidade(q, t);
+
+% Perío de amostragem 
+h = 0.2;
+
+% Cálcula trajectória para as respectivas juntas
+[ pos, q_traj ] = calcula_trajectoria(oTg, t, q, v_q, h);
 
 
-%% PLANEAMENTO NO ESPAÇO DAS JUNTAS
+%% MENU ("main")
 
-% NOTA: o vector <q> representa os valores das juntas 
+% Variaveis MENU
+select = 0;
+STOP = 4;
+
+while(select ~= STOP)
+    
+    select = menu('Seleccione a acao a realizar:', 'Home',...
+                                                   'Trajectoria',...
+                                                   'Mover Robot',...
+                                                   'Quit');  
+                                               
+    %% PLOT DO ROBOT:
+    if select == 1
+        figure('units','normalized','outerposition',[0 0 1 1]);
+         % Prespectiva de lado do Robot  
+        subplot(1,2,1);
+        robot.plot([q(1,:) 0], 'workspace', [-10 60 -10 40 -10 30], 'reach', ... 
+                       1, 'scale', 10, 'zoom', 0.5); % 'view', 'top', 'trail', 'b.');
                    
-
-% 
-% for t = 0 : 0.01 : 1
-%     posicao = calcula_trajectoria(t, t0, tf, theta0, thetaf, delta_t, v_juntas0, v_juntasf);
-% end
+        % Prespectiva de topo do Robot -------------------------------------
+        subplot(1,2,2);
+        robot.plot([q(1,:) 0], 'workspace', [-10 60 -10 40 -10 30],...
+                      'reach', 1,...
+                      'scale', 10,...
+                      'zoom', 0.5,...
+                      'view',...
+                      'top'); % 'trail', 'b.');
                    
-
-
+    disp('#######################################################################') 
+    end 
+     %% a) Expressões que permitem calcular os valores dos coeficientes das funções polinomiais
+    if select == 2
+        disp('______________________________________________________________________')
+        disp('Trajectoria efectuada pelo robô.')
+        disp('______________________________________________________________________')
+               
+        plot(pos(:,1), pos(:,2), 'r');
+        title('Trajectoria a efectuar pelo Robo');
+        xlabel('X')
+        ylabel('Y')
+        %xlim([0 k-1])
+        %ylim([-5 5])
+        grid on
+        
+        disp('#######################################################################')
+    end % fim da alinea a)
+    
+    %% b) Movimento do manipulador segundo a trajectória acima planeada
+    
+    if select == 3
+        
+        % Plot segundo o Controlador
+        figure('units','normalized','outerposition',[0 0 1 1]);
+        % Prespectiva de lado do Robô
+        subplot(1,2,1);
+        robot.plot([q_traj(1,:) 0], 'workspace', [-10 60 -10 40 -10 30], 'reach', ... % [-40 60 -10 100 -10 70]
+            1, 'scale', 10, 'zoom', 0.5); % 'view', 'top', 'trail', 'b.');
+        % Prespectiva de topo do Robô
+        subplot(1,2,2);
+        robot.plot([q_traj(1,:) 0], 'workspace', [-10 60 -10 40 -10 30], 'reach', ...
+            1, 'scale', 10, 'zoom', 0.5, 'view', 'top'); % 'trail', 'b.');
+        
+        for i=1:size(q_traj,1)
+            
+            robot.animate([q_traj(i,:) 0]);
+            
+        end
+    end
+    %
+end
