@@ -2,222 +2,308 @@ clear all
 close all
 clc
 
-disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-disp('%%                                                                  %%')
-disp('%%          [RobÛtica - 07/11/2017 ~ 26/11/2017] LABWORK#3          %%')
-disp('%%                                                                  %%')
-disp('%%                   Frederico Vaz, n∫ 2011283029                   %%')
-disp('%%                   Paulo Almeida, n∫ 2010128473                   %%')
-disp('%%                                                                  %%')
-disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
-disp(' ')
-%% RobÙ 3-DOF
+format short 
 
-disp('*************************** ExercÌcio 1 ******************************')
+disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+disp('%%     [Rob√≥tica - 11/11/2018 ~ 2/12/2018] LABWORK#3 - PROBLEMA 1    %%')
+disp('%%                                                                   %%')
+disp('%%                   Frederico Vaz, n¬∫ 2011283029                    %%')
+disp('%%                   Paulo Almeida, n¬∫ 2010128473                    %%')
+disp('%%                                                                   %%')
+disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+disp(' ')
+
+%% Rob√¥ num processo de	pintura
+disp('*************************** Exerc√≠cio 1 ******************************')
 
 syms theta1 theta2 theta3
 
-% Cumprimentos dos elos
-a2 = 40; d3 = 10;
+% Offset/comprimentos dos elos (fixos)
+syms L1 L2 L3
+% NOTA: L1, L2 <=> a2 & L3 <=> d3
 
-% Junta Rotacional ou Prismatica
+% Junta Rotacional ou Prismatica:
 R = 1; P = 0;
 
-%          thetai   di    ai   alfai  offseti  jointtypei
-PJ_DH = [  theta1    0    a2       0        0           R;   % Junta Rotacional
-           theta2    0    a2       0        0           R;   % Junta Rotacional
-           theta3   d3     0       0        0           R ]; % Junta Rotacional + Gripper
+% Robot 1 [RRR] - Matriz dos parametros de Denavith-Hartenberg: PJ_DH
+%____________________________________________________________________________________
+%          thetai  |  di  |  ai |  alfai | offseti | jointtypei
+%____________________________________________________________________________________
+PJ_DH = [  theta1      0     L1        0         0           R;   % Junta Rotacional
+%____________________________________________________________________________________    
+           theta2      0     L2        0         0           R;   % Junta Rotacional
+%____________________________________________________________________________________           
+           theta3     L3      0        0         0           R ]; % Junta Rotacional + Gripper
+%____________________________________________________________________________________
 
 % A cinematica directa ate o Gripper 
-[ oTg, Ti ] = direct_kinematics(PJ_DH);       
+[ T0_G, Ti ] = MGD_DH(PJ_DH);       
 
-oTg = simplify(oTg);
-Ti = simplify(Ti);
+% Offset/comprimentos dos elos (fixos)
+PJ_DH = eval(subs(PJ_DH, [L1 L2 L3], [40 40 10])); % a2 = 40 ou 35??
 
-% Inicializacao do Robo: Criar Links
 
-% 3 juntas Rotacionais     
-for i=1:3
-  L(i) = Link('d', eval(PJ_DH(i,2)),...
-              'a', eval(PJ_DH(i,3)),...
-              'alpha', eval(PJ_DH(i,4)),...
-              'offset', eval(PJ_DH(i,5)));
+%% INICIALIZA√á√ÉO DO ROBOT: CRIAR LINKS
+
+for i = 1 : size(PJ_DH,1)
+    
+    if PJ_DH(i,6) == R              % Juntas Rotacionais
+        
+        L(i) = Link('d',eval(PJ_DH(i,2)),...
+                    'a', eval(PJ_DH(i,3)),...
+                    'alpha', eval(PJ_DH(i,4)),...
+                    'offset', eval(PJ_DH(i,5)));
+    end
+    
+    if PJ_DH(i,6) == P              % Junta Prism√°tica
+        
+        L(i) = Link('theta',eval(PJ_DH(i,1)),...
+                    'a', eval(PJ_DH(i,3)),...
+                    'alpha', eval(PJ_DH(i,4)),...
+                    'offset', eval(PJ_DH(i,5)),...
+                    'qlim', [0 1]);
+    end
+
 end
 
-robot = SerialLink(L, 'name', 'Robot Planar RRR');
+robot = SerialLink(L, 'name', 'Rob√¥ Planar PPRRR');
 
 
+%% VARI√ÅVEIS GLOBAIS
 
-% V·ri·veis "globais":
-
-% InicializaÁ„o do vector de juntas
+% Inicializa√ß√£o do vector de juntas
 q = [ 0 0 0 ];
 
+% Posi√ß√£o Home
+Tb_f = [ 0  -1   0   20; % 20
+         1   0   0   50;
+         0   0   1   10;
+         0   0   0   0  ];
 
-% a) PosiÁ„o Home
-bTf = [ 0  -1   0   50;
-        1   0   0   50;
-        0   0   1   d3;
-        0   0   0   0  ];
+
+%% a) Cinem√°tica Inversa/Solu√ß√£o para √†s vari√°veis das juntas: theta1 theta2 theta3
+
+%NOTA: VER PDF EX1, SOLU√á√ïES AQUI PARA COMPLEMENTAR C√ÅCULOS
+
+syms nx ny nz sx sy sz ax ay az tx ty tz alpha
+     
+% Vector t           
+tx_ = T0_G(1,4);
+ty_ = T0_G(2,4);     
 
     
-% b) Jacobiano 
+% 1¬™ Solu√ß√£o: theta3
+equation1 = alpha == theta1 + theta2 + theta3;
+
+% Pela equa√ß√£o facilmente extra√≠mos o theta3:
+theta3_sol = solve(equation1, theta3);
+
+theta3_sol = subs(theta3_sol, alpha, atan2( ay, ax ));
+
+
+% 2¬™ Solu√ß√£o: theta2
+
+% Resolve a equa√ß√£o  tx¬≤ + ty¬≤ = tx_¬≤ + ty_¬≤
+equation2 = tx^2 + ty^2 == simplify( tx_^2 + ty_^2 );
+
+% Pela equa√ß√£o facilmente extra√≠mos o theta2:
+theta2_sol = simplify( solve(equation2, theta2) );
+
+
+% 3¬™ Solu√ß√£o: theta1
+
+%NOTA: VER PDF EX1 PARA ESTA SOLU√á√ÉO
+
+% Substitui a raz√£o trigonom√©trica c12 = c1*c2 - s1*s2
+tx__ = expand(subs(tx_, cos(theta1 + theta2), cos(theta1)*cos(theta2) - sin(theta1)*sin(theta2)));
+ty__ = expand(subs(ty_, cos(theta1 + theta2), cos(theta1)*cos(theta2) - sin(theta1)*sin(theta2)));
+
+% Coloca em ordem a c1 e c2
+tx__ = collect(tx__, cos(theta1)) * (1/((L1 + L2*cos(theta2))*cos(theta1)));
+ty__ = collect(ty__, sin(theta1)) * (1/((L1 + L2*cos(theta2))*cos(theta1)));
+
+% Coloca em ordem s1/c1
+tx__ = collect(tx__, sin(theta1)/cos(theta1));
+ty__ = collect(ty__, sin(theta1)/cos(theta1));
+
+% Resolve a equa√ß√£o ty / tx = tx_ / ty_ <=> alpha = atan( ty, tx ):
+equation = ty/tx ==  simplify( (tx__) / (ty__) );
+
+% Fica a c1:
+equation3 = isolate(equation, cos(theta1));
+
+%NOTA: VER PDF EX1 PARA ESTA SOLU√á√ÉO
+
+
+% Juntas do Rob√¥ dadas pela Cinem√°tica Inversa do robot
+q_byinv = inverse_kinematics_ex1(Tb_f);
+
+% Confirma√ß√£o usando a robotics toolbox
+%q_bytoolbox = robot.ikine(Tb_f, 'mask', [1 1 0 0 0 1]) % [x y z roll pitch yaw]
+
+
+%% b) Jacobiano: express√µes para a velocidade de rota√ß√£o das juntas 
 
 % Juntas em symbolic p/ resolver o Jacobiano
 q_aux = [ theta1 theta2 theta3 ];
         
-% Construir a Jacobiana a partir dos par‚metros calculados na cinem·tica inversa
-Jac = Jacobian(oTg, Ti, q_aux, PJ_DH(:,6));
+% Construir a Jacobiana a partir dos par√¢metros calculados na cinem√°tica inversa
+Jac = Jacobian(T0_G, Ti, q_aux, PJ_DH(:,6));
 
 % Retirar as componentes de velocidade nula [ vz wx wy ]
 Jac_ = [ Jac(1:2,:); Jac(6,:) ];
         
+% Restri√ß√£o na velocidade em cm/s
+Vx = sqrt(5)*3;
+Vy = sqrt(5)*6;
+
+% Inversa da Jacobiana x Velocidades em XYZ
+qVelocidades = inv(Jac_)*[ Vx Vy 0 ]';
 
 
-% Variaveis MENU
+%% c) Movimento do manipulador: MAIS A BAIXO NO C√ìDIGO DO MENU
+
+        
+%% MENU ("main")
+
 select = 0;
 select2 = 0;
-STOP = 6;
+STOP = 5;
 STOP2 = 3;
+first = 0;
 
 while(select ~= STOP)
     
-    select = menu('Seleccione a acao a realizar:', 'Cinematica Directa',...
-                                                   'Plot do Robo',...
-                                                   'alinea a)',...
-                                                   'alinea b)',...
-                                                   'alinea c)',...
-                                                   'sair do programa');    
-    % Matriz dos parametros de Denavith-Hartenberg: PJ_DH
-    if select == 1  
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp('PJ_DH: Matriz dos parametros de Denavith-Hartenberg:')
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp(PJ_DH) % Ver se d· para colocar a tabela do SerialLink
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp('oTg: Cinematica Directa c/ variaveis simbolicas:')
-        disp('______________________________________________________________________')
-        disp(' ')
-        disp(oTg)
-    disp('#######################################################################')   
-    end  
+    select = menu('Seleccione a acao a realizar:', 'Plot do Rob√¥',...
+                                                   'al√≠nea a)',...
+                                                   'al√≠nea b)',...
+                                                   'al√≠nea c)',...
+                                                   'Sair');    
     
-    %% PLOT DO ROBOT:
-    if select == 2
+   % Matriz dos par√¢metros de Denavith-Hartenberg: PJ_DH e a O T G
+    if first < 1
+        disp('______________________________________________________________________')
+        disp(' ')
+        disp('a) Matriz dos par√¢metros de Denavith-Hartenberg: PJ_DH')
+        disp('______________________________________________________________________')
+        disp(' ')
+        robot.display
+        disp('______________________________________________________________________')
+
+        first = first + 1;
+    end 
+    
+    % PLOT DO ROBOT:
+    if select == 1
         figure('units','normalized','outerposition',[0 0 1 1]);
-         % Prespectiva de lado do RobÙ  
+        
+        % Prespectiva de lado do Rob√¥  
         subplot(1,2,1);
         robot.plot(q, 'workspace', [-10 90 -10 90 -10 90], 'reach', ... 
-                       1, 'scale', 10, 'zoom', 0.25); % 'view', 'top', 'trail', 'b.');
-        % Prespectiva de topo do RobÙ  
+                       1, 'scale', 10, 'zoom', 0.25, 'jaxes');         
+        % Prespectiva de topo do Rob√¥  
         subplot(1,2,2);
         robot.plot(q, 'workspace', [-10 90 -10 90 -10 90], 'reach', ... 
-                       1, 'scale', 10, 'zoom', 0.25, 'view', 'top'); % 'trail', 'b.');
-                   
-    disp('#######################################################################') 
+                       1, 'scale', 10, 'zoom', 0.25, 'view', 'top', 'jaxes');
+                  
     end   
     
-    %% a) Soluc„o para as vari·veis	das	juntas do robot	q = [ theta1 theta1 theta3 ] que garanta o 
-    %     correto posicionamento da ferramenta na posicao "home" do processo de pintura.
-    if select == 3
+    % a) Soluc√£o para as vari√°veis	das	juntas do robot	q = [ theta1 theta1 theta3 ] que garanta o 
+    %    correto posicionamento da ferramenta na posi√ß√£o "home" do processo de pintura.
+    if select == 2
         disp('______________________________________________________________________')
         disp(' ')
-        disp('a) Robo na posicao home:')
+        disp('a) Rob√¥ na posi√ß√£o home:')
         disp('______________________________________________________________________')
 
-        % Dada a matriz de TransformaÁ„o correspondente ao "home" do processo de pintura
-        % Obtemos uma soluÁ„o para as juntas, atravÈs da cinem·tica inversa do robo
-        [ q ] = inverse_kinematics_ex1(bTf);
+        [ q ] = inverse_kinematics_ex1(Tb_f);
 
         disp(' ')
-        disp(['Segundo ao vector q = [ ' num2str(rad2deg(q(1,1))) '∫ ' num2str(rad2deg(q(1,2))) '∫ '...
-               num2str(rad2deg(q(1,3))) '∫ ] extraÌdo atravÈs da cinem·tica inversa.'])
+        disp(['Segundo ao vector q = [ ' num2str(rad2deg(q(1,1))) '¬∫ ' num2str(rad2deg(q(1,2))) '¬∫ '...
+               num2str(rad2deg(q(1,3))) '¬∫ ] extra√≠do atrav√©s da cinem√°tica inversa.'])
 
-        % Plot do Robo na posiÁ„o home!
+        % Plot do Robo na posi√ß√£o home!
         disp(' ')
-        disp('Clique em "Plot do RobÙ" para o visualizar!')
+        disp('Clique em "Plot do Rob√¥" para o visualizar!')
     
     disp(' ')
-    disp('#######################################################################')
+    disp('______________________________________________________________________')
     end % fim da alinea a)    
     
-    %% b) Jacobiano - Expressıes para a velocidade de rotaÁ„o das juntas 
-    %     que asseguram a restriÁ„o temporal de pintura (vx=10cm/seg).	
-    if select == 4
+    % b) Jacobiano - Express√µes para a velocidade de rota√ß√£o das juntas 
+    %    que asseguram a restri√ß√£o temporal de pintura (v=15cm/seg).	
+    if select == 3
         disp('______________________________________________________________________')
         disp(' ')
         disp('b) Jacobiano:')
         disp('______________________________________________________________________')
-               
-        % RestriÁ„o na velocidade x em cm/s
-        Vx = 10; 
-        
-        % Inversa da Jacobiana x Velocidades em XYZ 
-        qVelocidades = inv(Jac_)*[ Vx 0 0 ]';  
         disp(' ')
-        disp('Expresoes para a velocidade das juntas p/ Vx = 10cm/s:')
+        disp('Expresoes para a velocidade das juntas p/ V = 15cm/s:')
         disp(' ')
         disp(qVelocidades)
      
-    disp('#######################################################################')    
+    disp('______________________________________________________________________')   
     end % fim da alinea b)
     
-    %% c) Movimento do manipulador com malha de controlo
-    if select == 5
-       %% sub-menu
+    % c) Movimento do manipulador com malha de controlo
+    if select == 4
+       % sub-menu
        while(select2 ~= STOP2)
            
            select2 = menu('Seleccione a opcao:', 'Integrador',...
-                                                  'Malha-Fechada',...
-                                                  'Back'); 
+                                                 'Malha-Fechada',...
+                                                 'Back'); 
            
-           % RestriÁ„o imposta no enuciado (e tÍm que ser negativo
+           % Restri√ß√£o imposta no enuciado (e t√™m que ser negativo
            % para ir no sentido da base)
-           Vx = -10;
-           % PosiÁ„o Y segundo a equaÁ„o da reta y = mx + b
-           Vy = Vx;
+           Vx = -sqrt(5)*3;
+           % Posi√ß√£o Y segundo a equa√ß√£o da reta y = 2x + 10
+           Vy = -sqrt(5)*6; %2*Vx + 10;
            
-           % PosiÁ„o Final do Gripper
-           Xf = 0; Yf = 0;
+           % Posi√ß√£o Final do Gripper
+           Xf = -20; Yf = -50;
                               
-           % PerÌodo de Amostragem dos Controladores 
+           % Per√≠odo de Amostragem dos Controladores 
            h = 0.1;
            
-           % Inicializa as Juntas segundo a Matriz Home/PosiÁ„o Inicial
-           [ q_controlo ] = inverse_kinematics_ex1(bTf);
+           % Inicializa as Juntas segundo a Matriz Home/Posi√ß√£o Inicial
+           [ q_controlo ] = inverse_kinematics_ex1(Tb_f);
+           
+           Jac_ = eval(subs(Jac_, [L1 L2 L3], [40 40 10]));
+           T0_G = eval(subs(T0_G, [L1 L2 L3], [40 40 10]));
            
            % 1. Abordagem Integradora (Malha Aberta)
            if select2 == 1
               
                k = 1;
                 
-               while(bTf(1,4,k) > Xf && bTf(2,4) > Yf)
-                
+               while(Tb_f(1,4,k) > Xf || Tb_f(2,4,k) > Yf)
+                    
                    % [ Vx vy Vz ]
                    V(k,:) = [ Vx Vy 0 ];
                    
-                   % Inversa do Jacobiano x Velocidades em XYZ 
-                   qVelocidades_ = inv(Jac_)*V(k,:)';  
+                   % Inversa do Jacobiano x Velocidades em XYZ
+                   qVelocidades_ = inv(Jac_)*V(k,:)';
+                   
+                   
                    % Calculo da Inversa do Jacobiano
                    qVelocidades(:,k) = eval(subs(qVelocidades_, q_aux, q_controlo(k,:)));
                    
                    % Proximas Juntas segundo a Lei de Controlo: Abordagem Integradora
                    q_controlo(k+1,:) = q_controlo(k,:) + h*qVelocidades(:,k)';
                    
-                   % tx e ty atravÈs da Matriz da Cinem·tica Directa
-                   bTf(:,:,k+1) = eval(subs(oTg, q_aux, q_controlo(k+1,:)));
+                   
+                   % tx e ty atrav√©s da Matriz da Cinem√°tica Directa
+                   Tb_f(:,:,k+1) = eval(subs(T0_G, q_aux, q_controlo(k+1,:)));
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str(k/50*100), '%']) 
+                   disp(['Loading... ', num2str(k/74*100), '%']) 
                 
                    k = k + 1;
                end
                
-               % PLOT do RobÙ com velocidades
+               % PLOT do Rob√¥ com velocidades
                plot_robot(robot, k, V, qVelocidades, q_controlo);
               
            end
@@ -226,21 +312,21 @@ while(select ~= STOP)
            if select2 == 2
 
                % Controlo Propocional
-               kp = 1.0;
+               kp = 0.25;
                % Controlo Derivativo
-               kd = 0.65;
+               kd = 0.1;
                
-               % PosiÁ„o Inicial!
-               tx_desej = 50;
+               % Posi√ß√£o Inicial!
+               tx_desej = 20;
                ty_desej = 50;
                
-               % Deslocamento = Velocidade*PerÌodo IDEAL!
+               % Deslocamento = Velocidade*Per√≠odo IDEAL!
                dx = Vx*h;
                dy = Vy*h;
                
                k = 1;
                
-               while(bTf(1,4,k) > Xf && bTf(2,4) > Yf)
+               while(Tb_f(1,4,k) > Xf || Tb_f(2,4, k) > Yf)
 
                    % [ vx vy vz ]
                    V(k,:) = [ Vx Vy 0 ];
@@ -253,15 +339,15 @@ while(select ~= STOP)
                    % Proximas Juntas
                    q_controlo(k+1,:) = q_controlo(k,:) + h*qVelocidades(:,k)';
                    
-                   % tx e ty atravÈs da Matriz da Cinem·tica Directa -> f(q(k))
-                   bTf(:,:,k+1) = eval(subs(oTg, q_aux, q_controlo(k+1,:)));
+                   % tx e ty atrav√©s da Matriz da Cinem√°tica Directa -> f(q(k))
+                   Tb_f(:,:,k+1) = eval(subs(T0_G, q_aux, q_controlo(k+1,:)));
                    
                    % ------------------------------------------------------
-                   % Guardamos a PosiÁ„o actual
-                   tx_actual = bTf(1,4,k);
-                   ty_actual = bTf(2,4,k);
+                   % Guardamos a Posi√ß√£o actual
+                   tx_actual = Tb_f(1,4,k);
+                   ty_actual = Tb_f(2,4,k);
                   
-                   % PosiÁ„o desejada = PosiÁ„o + Deslocamento IDEAL!
+                   % Posi√ß√£o desejada = Posi√ß√£o + Deslocamento IDEAL!
                    tx_desej = tx_desej + dx;
                    ty_desej = ty_desej + dy;
                    
@@ -272,18 +358,18 @@ while(select ~= STOP)
                    Vy = kp*dy_erro + kd*dy_erro/h;
                    
                    % NOTA: Como estamos a dividir o deslocamento a efectuar
-                   % pelo PerÌodo temos de imeadiato a velocidade a impor
+                   % pelo Per√≠odo temos de imeadiato a velocidade a impor
                    % ou seja, pela parte derivativa do controlo
                    % ------------------------------------------------------  
                    
                    clc
                    disp(' ')
-                   disp(['Loading... ', num2str(k/51*100), '%']) 
+                   disp(['Loading... ', num2str(k/82*100), '%']) 
                    
                    k = k + 1;
                end
                
-               % PLOT do RobÙ com velocidades
+               % PLOT do Rob√¥ com velocidades
                plot_robot(robot, k, V, qVelocidades, q_controlo);          
              
            end     
@@ -291,10 +377,7 @@ while(select ~= STOP)
        end
       
         
-    disp('#######################################################################')   
+    disp('______________________________________________________________________') 
     end % fim da alinea c)
     
 end % fim do menu/ fim do exercicio
-%disp('#######################################################################')
-
-

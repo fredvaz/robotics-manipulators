@@ -1,20 +1,25 @@
 
-%% FunÁ„o da Cinem·tica Inversa do RobÙ
-%  Consultar Ex1_Inversa.pdf, para melhor compreens„o da implementaÁ„o 
+%% Fun√ß√£o da Cinem√°tica Inversa do Rob√¥
+%  Consultar Ex1_Inversa.pdf, para melhor compreens√£o da implementa√ß√£o 
 
-function [ q ] = inverse_kinematics_ex1(oTg)
+function [ q ] = inverse_kinematics_ex1(T0_G)
 
     % Cumprimento dos elos
-    a2 = 40;
+    L1 = 40; L2 = 40; L3 = 10;
     
     % Vector t
-    tx = oTg(1,4);
-    ty = oTg(2,4);
+    tx = T0_G(1,4);
+    ty = T0_G(2,4);
+    % vector a
+    ax = T0_G(1,3); ay = T0_G(2,3);
     
-    % Caso em que theta2 È negativo
-    theta2 = -acos((tx^2 + ty^2 - a2^2 - a2^2)/(2*a2*a2));
-    theta1 = atan2(ty,tx) - atan2(a2*sin(theta2), a2+a2*cos(theta2));
-    theta3 = (pi/2 - theta1 - theta2) - pi/2; % subtraiu-se -pi/2, sÛ para o gripper ficar "alinhado" com os eixos XY
+  
+    theta2 = -acos( (tx^2 + ty^2 - L1^2 - L2^2) / (2*L1*L2) );
+    
+    theta1 = atan2( ty, tx ) - atan2( L2*sin(theta2), L1 + L2*cos(theta2) );
+    
+    theta3 = atan2( ay, ax ) - theta1 - theta2; 
+    
     
     q = [theta1 theta2 theta3];
     
