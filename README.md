@@ -4,9 +4,10 @@
 A set of Robotics theory exercises  and Robotics Manipulators using the Peter Corke [Robotics Toolbox](http://petercorke.com/wordpress/toolboxes/robotics-toolbox).
 
 
-## Requirements
+## Dependencies
 
 - git
+- [MATLAB](https://www.mathworks.com/products/matlab.html)
 - [Robotics Toolbox](http://petercorke.com/wordpress/toolboxes/robotics-toolbox)
 
 
